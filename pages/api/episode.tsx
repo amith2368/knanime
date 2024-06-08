@@ -3,7 +3,10 @@ import axios from 'axios';
 import * as cheerio from 'cheerio';
 
 type EpisodeLinks = {
-  mirrors: string[];
+    title: string,
+    mirrors: string[];
+    hasNext: boolean;
+    hasPrevious: boolean;
 };
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
@@ -27,8 +30,15 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
           }
       });
 
+      const title = $('div.anime-info a').text().trim();
+      const hasNext = $('div.anime_video_body_episodes_r a').length > 0;
+      const hasPrevious = $('div.anime_video_body_episodes_l a').length > 0;
+
       const episodeLinks: EpisodeLinks = {
+          title,
           mirrors,
+          hasNext,
+          hasPrevious
       };
 
        res.status(200).json(episodeLinks);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Router from 'next/router';
 import "../app/globals.css";
 
@@ -9,22 +9,32 @@ const Home: React.FC = () => {
         Router.push(`/results?query=${encodeURIComponent(query)}`);
     };
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
+
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-purple-500 to-pink-500">
-            <div className="text-white text-4xl font-bold mb-8">
-                <h1>KNAnime</h1>
+        <div className="relative flex flex-col items-center justify-center min-h-screen bg-black">
+            <div className="absolute inset-0 bg-cover bg-center opacity-50"
+                 style={{ backgroundImage: "url('https://c4.wallpaperflare.com/wallpaper/142/751/831/landscape-anime-digital-art-fantasy-art-wallpaper-preview.jpg')" }}>
             </div>
-            <div className="flex flex-col items-center justify-center p-6 bg-white rounded-lg shadow-xl">
+            <div className="relative z-10 text-white text-6xl font-bold mb-16">
+                <h1 className="text-red-600">KNAnime</h1>
+            </div>
+            <div className="relative z-10 flex flex-col items-center justify-center p-8 bg-gray-800 bg-opacity-80 rounded-lg shadow-2xl">
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     placeholder="Search videos"
-                    className="p-3 text-lg border-2 border-gray-300 focus:border-purple-500 rounded outline-none mb-4 transition text-black duration-300 ease-in-out"
+                    className="w-80 p-3 text-lg border-2 border-gray-600 focus:border-red-600 rounded outline-none mb-6 transition text-black duration-300 ease-in-out"
                 />
                 <button
                     onClick={handleSearch}
-                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg transition duration-300 ease-in-out"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-3 px-8 rounded-lg transition duration-300 ease-in-out"
                 >
                     Search
                 </button>
