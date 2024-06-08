@@ -27,7 +27,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     const title = $('div.anime_info_body_bg h1').text();
     const year = $('p:contains(Released)').text().replace('Released: ', '');
     const image_url = $('div.anime_info_body_bg img').attr('src');
-    const description = $('div.anime_info_body_bg p.type').next().text().trim();
+    const description = $('div.description').text().trim();
     const genre = $('p:contains(Genre)').text().replace('Genre: ', '').trim();
     const status = $('p:contains(Status)').text().replace('Status: ', '').trim();
     // const episodes = $('#episode_page').find('li:last').attr('ep_end');

@@ -45,7 +45,7 @@ const Results: React.FC = () => {
         return (
             <div className="flex items-center justify-center min-h-screen bg-black">
                 <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-red-600" role="status">
-                    <span className="visually-hidden">Loading...</span>
+                    <span className="visually-hidden">...</span>
                 </div>
             </div>
         );

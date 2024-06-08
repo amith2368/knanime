@@ -11,7 +11,7 @@ const KNFooter: React.FC = () => {
                         <p className="hover:text-red-500">About</p>
                 </Link>
             </nav>
-            <p>&copy; 2024 KNAnime. All rights reserved.</p>
+            <p>&copy; 2024 KNAnime. All rights reserved. KNAnime has been sourced by material from GoGoAnime</p>
         </footer>
     );
 };

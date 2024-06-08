@@ -21,9 +21,8 @@ const AnimePage: React.FC = () => {
     const router = useRouter();
     const { id } = router.query;
     const [details, setDetails] = useState<AnimeDetails | null>(null);
-    const [displayedEpisodes, setDisplayedEpisodes] = useState<number[]>([]);
-    const [hasMore, setHasMore] = useState(true);
     const [isTransitioning, setIsTransitioning] = useState(false);
+    const [currentRange, setCurrentRange] = useState<[number, number] | null>(null);
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -31,8 +30,6 @@ const AnimePage: React.FC = () => {
                 try {
                     const response = await axios.get(`/api/anime?keyword=${encodeURIComponent(id)}`);
                     setDetails(response.data);
-                    setDisplayedEpisodes(Array.from({ length: Math.min(100, response.data.episodes) }, (_, i) => i + 1));
-                    setHasMore(response.data.episodes > 100);
                 } catch (e) {
                     console.error('Failed to fetch anime details:', e);
                 }
@@ -42,15 +39,16 @@ const AnimePage: React.FC = () => {
         fetchDetails();
     }, [id]);
 
-    const fetchMoreEpisodes = () => {
-        if (details) {
-            const newEpisodes = Array.from(
-                { length: Math.min(20, details.episodes - displayedEpisodes.length) },
-                (_, i) => i + 1 + displayedEpisodes.length
-            );
-            setDisplayedEpisodes(prevEpisodes => [...prevEpisodes, ...newEpisodes]);
-            setHasMore(displayedEpisodes.length + newEpisodes.length < details.episodes);
+    const episodeRanges = (totalEpisodes: number, rangeSize: number = 50): [number, number][] => {
+        const ranges: [number, number][] = [];
+        for (let i = 1; i <= totalEpisodes; i += rangeSize) {
+            ranges.push([i, Math.min(i + rangeSize - 1, totalEpisodes)]);
         }
+        return ranges;
+    };
+
+    const handleRangeClick = (range: [number, number]) => {
+        setCurrentRange(range);
     };
 
     const handleAnimeClick = (url: string) => {
@@ -64,7 +62,7 @@ const AnimePage: React.FC = () => {
         return (
             <div className="flex items-center justify-center min-h-screen bg-black text-white">
                 <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-red-600" role="status">
-                    <span className="visually-hidden">Loading...</span>
+                    <span className="visually-hidden">...</span>
                 </div>
             </div>
         );
@@ -81,37 +79,41 @@ const AnimePage: React.FC = () => {
                 <p className="text-md mb-2">Genre: {details.genre}</p>
                 <p className="text-md mb-2">Status: {details.status}</p>
                 <p className="text-md mb-4">Episodes: {details.episodes}</p>
-                <div>
-                    <InfiniteScroll
-                        dataLength={displayedEpisodes.length}
-                        next={fetchMoreEpisodes}
-                        hasMore={hasMore}
-                        loader={<h4>Loading more episodes...</h4>}
-                        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
-                    >
-                        {displayedEpisodes.map(episode => (
+                <div className="mb-8">
+                    {episodeRanges(details.episodes).map((range, index) => (
+                        <button
+                            key={index}
+                            onClick={() => handleRangeClick(range)}
+                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out mr-2 mb-2"
+                        >
+                            {range[0]}-{range[1]}
+                        </button>
+                    ))}
+                </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                    {currentRange &&
+                        Array.from({ length: currentRange[1] - currentRange[0] + 1 }, (_, i) => i + currentRange[0]).map((episode) => (
                             <button
                                 key={episode}
-                                onClick={() => handleAnimeClick(`${id}/${episode}`)}
-                                className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition transform duration-300 ease-in-out"
+                                onClick={() =>  handleAnimeClick(`${id}/${episode}`)}
+                                className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
                             >
                                 Ep {episode}
                             </button>
                         ))}
-                    </InfiniteScroll>
                 </div>
             </div>
             <div className="lg:w-1/3 w-full mt-8 lg:mt-0">
-                <div className="relative">
-                    <img
-                        src={details.image_url}
-                        alt={details.title}
-                        className="w-full h-auto rounded-lg shadow-lg"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black rounded-lg"></div>
+                    <div className="relative">
+                        <img
+                            src={details.image_url}
+                            alt={details.title}
+                            className="w-full h-auto rounded-lg shadow-lg"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black rounded-lg"></div>
+                    </div>
                 </div>
             </div>
-        </div>
             <KNFooter />
         </div>
     );

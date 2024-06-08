@@ -23,8 +23,8 @@ const KNHeader: React.FC = () => {
                     <Link href="/">
                         <p className="hover:text-red-500">Home</p>
                     </Link>
-                    <Link href="https://github.com/amith2368">
-                        <p className="hover:text-red-500">Contact</p>
+                    <Link href="https://gogoanime.gg">
+                        <p className="hover:text-red-500">Source</p>
                     </Link>
                 </nav>
             </div>
