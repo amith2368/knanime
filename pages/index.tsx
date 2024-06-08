@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Router from 'next/router';
 import "../app/globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const Home: React.FC = () => {
     const [query, setQuery] = useState<string>('');
@@ -17,6 +18,7 @@ const Home: React.FC = () => {
 
     return (
         <div className="relative flex flex-col items-center justify-center min-h-screen bg-black">
+            <SpeedInsights />
             <div className="absolute inset-0 bg-cover bg-center opacity-50"
                  style={{ backgroundImage: "url('https://c4.wallpaperflare.com/wallpaper/142/751/831/landscape-anime-digital-art-fantasy-art-wallpaper-preview.jpg')" }}>
             </div>
