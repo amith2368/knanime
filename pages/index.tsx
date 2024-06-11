@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import Router from 'next/router';
 import "../app/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 const Home: React.FC = () => {
     const [query, setQuery] = useState<string>('');
@@ -17,7 +19,7 @@ const Home: React.FC = () => {
     };
 
     return (
-        <div className="relative flex flex-col items-center justify-center min-h-screen bg-black">
+        <div className="animate-in fade-in duration-400 relative flex flex-col items-center justify-center min-h-screen bg-black">
             <SpeedInsights />
             <div className="absolute inset-0 bg-cover bg-center opacity-50"
                  style={{ backgroundImage: "url('https://c4.wallpaperflare.com/wallpaper/142/751/831/landscape-anime-digital-art-fantasy-art-wallpaper-preview.jpg')" }}>
@@ -31,7 +33,7 @@ const Home: React.FC = () => {
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="Search videos"
+                    placeholder="Search Anime..."
                     className="w-80 p-3 text-lg border-2 border-gray-600 focus:border-red-600 rounded outline-none mb-6 transition text-black duration-300 ease-in-out"
                 />
                 <button

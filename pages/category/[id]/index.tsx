@@ -23,6 +23,13 @@ const AnimePage: React.FC = () => {
     const [details, setDetails] = useState<AnimeDetails | null>(null);
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [currentRange, setCurrentRange] = useState<[number, number] | null>(null);
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    const maxLength = 200; // Number of characters to show initially
+
+    const toggleDescription = () => {
+        setIsExpanded(!isExpanded);
+    };
 
     useEffect(() => {
         const fetchDetails = async () => {
@@ -39,7 +46,7 @@ const AnimePage: React.FC = () => {
         fetchDetails();
     }, [id]);
 
-    const episodeRanges = (totalEpisodes: number, rangeSize: number = 50): [number, number][] => {
+    const episodeRanges = (totalEpisodes: number, rangeSize: number = 30): [number, number][] => {
         const ranges: [number, number][] = [];
         for (let i = 1; i <= totalEpisodes; i += rangeSize) {
             ranges.push([i, Math.min(i + rangeSize - 1, totalEpisodes)]);
@@ -74,7 +81,17 @@ const AnimePage: React.FC = () => {
             <div className="min-h-screen bg-black text-white p-8 flex flex-col lg:flex-row items-center lg:items-start">
             <div className="flex-1 lg:pr-8">
                 <h1 className="text-4xl font-bold mb-4">{details.title}</h1>
-                <p className="text-lg mb-4">{details.description}</p>
+                <p className="text-lg mb-4">
+                    {isExpanded ? details.description : `${details.description.slice(0, maxLength)}...`}
+                    {details.description.length > maxLength && (
+                        <button
+                            onClick={toggleDescription}
+                            className="text-blue-500 hover:text-blue-700 focus:outline-none ml-2"
+                        >
+                            {isExpanded ? 'Read Less' : 'Read More'}
+                        </button>
+                    )}
+                </p>
                 <p className="text-md mb-2">Released: {details.year}</p>
                 <p className="text-md mb-2">Genre: {details.genre}</p>
                 <p className="text-md mb-2">Status: {details.status}</p>

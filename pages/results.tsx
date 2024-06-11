@@ -43,7 +43,7 @@ const Results: React.FC = () => {
 
     if (!animes) {
         return (
-            <div className="flex items-center justify-center min-h-screen bg-black">
+            <div className="animate-in fade-in duration-300 flex items-center justify-center min-h-screen bg-black">
                 <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-red-600" role="status">
                     <span className="visually-hidden">...</span>
                 </div>
@@ -52,7 +52,7 @@ const Results: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen bg-black text-white p-8 ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
+        <div className={`animate-in fade-in min-h-screen bg-black text-white p-8 ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
             <KNHeader />
             <div className="min-h-screen bg-black text-white p-8">
                 <h1 className="text-4xl font-bold mb-8 text-center">Anime Results</h1>

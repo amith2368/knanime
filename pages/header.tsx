@@ -35,7 +35,7 @@ const KNHeader: React.FC = () => {
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                        placeholder="Search"
+                        placeholder=" Search"
                         className="p-2 bg-gray-800 text-white rounded-full pl-8 focus:outline-none"
                     />
                     <FontAwesomeIcon

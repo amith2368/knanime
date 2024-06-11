@@ -4,7 +4,6 @@ import * as cheerio from 'cheerio';
 
 type EpisodeLinks = {
     title: string,
-    mirrors: string[];
     hasNext: boolean;
     hasPrevious: boolean;
 };
@@ -21,14 +20,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       const {data} = await axios.get(url);
       const $ = cheerio.load(data);
 
-      const mirrors: string[] = [];
-
-      $('div.anime_muti_link ul li').each((index, element) => {
-          const mirrorUrl = $(element).find('a').attr('data-video');
-          if (mirrorUrl) {
-              mirrors.push(mirrorUrl);
-          }
-      });
 
       const title = $('div.anime-info a').text().trim();
       const hasNext = $('div.anime_video_body_episodes_r a').length > 0;
@@ -36,7 +27,6 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
       const episodeLinks: EpisodeLinks = {
           title,
-          mirrors,
           hasNext,
           hasPrevious
       };

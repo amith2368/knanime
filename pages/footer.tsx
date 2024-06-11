@@ -11,7 +11,7 @@ const KNFooter: React.FC = () => {
                         <p className="hover:text-red-500">About</p>
                 </Link>
             </nav>
-            <p>&copy; 2024 KNAnime. All rights reserved. KNAnime has been sourced by material from GoGoAnime</p>
+            <p>&copy; 2024 KNAnime. All rights reserved. KNAnime does not retain any files on its server. Rather, it solely provides links to media content hosted by third-party services.</p>
         </footer>
     );
 };
