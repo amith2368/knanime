@@ -62,7 +62,7 @@ const EpisodePage = () => {
             try {
                 const { data } = await axios.get(url, { params: { server: "gogocdn" } });
                 const sources = data['sources'];
-                const defaultSource = sources.find((source => source.quality === 'default'));
+                const defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
                 setHlsSource(defaultSource['url']);
                 setIsLoading(false);
             } catch (err) {
