@@ -76,7 +76,7 @@ const AnimePage: React.FC = () => {
     }
 
     return (
-        <div className={`min-h-screen bg-black text-white p-8 ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
+        <div className={`min-h-screen bg-black text-white ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
             <KNHeader />
             <div className="min-h-screen bg-black text-white p-8 flex flex-col lg:flex-row items-center lg:items-start">
             <div className="flex-1 lg:pr-8">

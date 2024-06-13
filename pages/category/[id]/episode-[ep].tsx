@@ -2,12 +2,18 @@ import "../../../app/globals.css";
 import "./player.css"
 import '@vidstack/react/player/styles/base.css';
 import '@vidstack/react/player/styles/plyr/theme.css';
-import { MediaPlayer, MediaProvider } from '@vidstack/react';
+import {
+    isHLSProvider,
+    MediaPlayer, MediaPlayerInstance,
+    MediaProvider,
+    MediaProviderAdapter,
+    MediaProviderChangeEvent
+} from '@vidstack/react';
 import { PlyrLayout, plyrLayoutIcons } from '@vidstack/react/player/layouts/plyr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import axios from 'axios';
 import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
@@ -26,14 +32,56 @@ const ServerStates = {
   VIDSTREAMING: 'vidstreaming'
 };
 
+type SkipTime = {
+  interval: {
+    startTime: number;
+    endTime: number;
+  };
+  skipType: string;
+};
+
+type FetchSkipTimesResponse = {
+    results: SkipTime[];
+};
+
 const EpisodePage = () => {
     const API_URI = 'https://knanime-api.vercel.app/'
     const router = useRouter();
+    const player = useRef<MediaPlayerInstance>(null);
     const { id, ep } = router.query;
     const [episodeData, setEpisodeData] = useState<EpisodeLinks | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [ hlsSource, setHlsSource] = useState('')
+    const [ autoPlay, setAutoPlay] = useState<boolean>(true);
+    const [ autoSkip, setAutoSkip ] = useState<boolean>(false);
+    const [ skipTimes, setSkipTimes ] = useState<SkipTime[]>([]);
+
+    function onProviderChange(
+        provider: MediaProviderAdapter | null,
+        _nativeEvent: MediaProviderChangeEvent,
+      ) {
+        if (isHLSProvider(provider)) {
+          provider.config = {};
+        }
+      }
+
+    function onTimeUpdate() {
+        if (player.current) {
+            const current_time = player.current.currentTime;
+            const duration = player.current.duration || 1;
+            const playbackPercentage = (current_time / duration);
+            if (autoSkip && skipTimes.length > 0) {
+                const skipInterval = skipTimes.find(
+                  ({ interval }) =>
+                    current_time >= interval.startTime && current_time < interval.endTime,
+                );
+                if (skipInterval) {
+                  player.current.currentTime = skipInterval.interval.endTime;
+                }
+            }
+        }
+    }
 
     useEffect(() => {
         const fetchVideoData = async () => {
@@ -71,6 +119,31 @@ const EpisodePage = () => {
         };
         fetchStreamData();
     }, [id, ep]);
+
+
+    useEffect(() => {
+    const fetchSkipTimes = async () => {
+      try {
+        const response = await axios.get('/api/aniskip', {
+          params: {
+            malId: 269,
+            episodeNumber: ep,
+            episodeLength: 0,
+          },
+        });
+        const st: FetchSkipTimesResponse = response.data;
+        const filteredSkipTimes = st.results.filter(
+          ({ skipType }) => skipType === 'op' || skipType === 'ed',
+        );
+        setSkipTimes(filteredSkipTimes)
+
+      } catch (error) {
+        console.error('Error fetching skip times:', error);
+      }
+    };
+
+    fetchSkipTimes();
+  }, [ep]);
 
 
     const handleNextEpisode = () => {
@@ -111,7 +184,7 @@ const EpisodePage = () => {
     return (
         <div>
             <KNHeader />
-            <div className="min-h-screen bg-black text-white p-8">
+            <div className="min-h-screen bg-black text-white pl-4 pr-4">
                 <div className="max-w-4xl mx-auto">
                     <button
                         onClick={handleBackToAnimePage}
@@ -120,14 +193,20 @@ const EpisodePage = () => {
                         <FontAwesomeIcon icon={faArrowLeft} />
                         <span>Back to Anime Page</span>
                     </button>
-                    <h1 className="text-3xl font-bold mb-4">{episodeData?.title}</h1>
-                    <h2 className="text-2xl font-semibold mb-4">Episode {ep}</h2>
+                    <h1 className="text-3xl font-bold mb-4">{episodeData?.title} <span
+                        className="text-2xl font-semibold mb-4">Episode {ep}</span></h1>
+
                     <div className="relative mb-8">
                         <div>
                             <MediaPlayer
+                                className='player'
                                 title={episodeData?.title}
                                 src={hlsSource}
-                                autoPlay
+                                autoPlay={autoPlay}
+                                ref={player}
+                                onTimeUpdate={onTimeUpdate}
+                                onProviderChange={onProviderChange}
+                                keyTarget='player'
                                 onEnded={handleNextEpisode}
                             >
                                 <MediaProvider/>

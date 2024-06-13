@@ -5,6 +5,7 @@ const config: Config = {
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    'node_modules/preline/dist/*.js',
   ],
   theme: {
     extend: {
@@ -20,6 +21,8 @@ const config: Config = {
     require('@vidstack/react/tailwind.cjs')({
       prefix: 'media',
     }),
+    require('@tailwindcss/forms'),
+    require('preline/plugin'),
   ],
 };
 
