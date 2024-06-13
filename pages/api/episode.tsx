@@ -8,6 +8,8 @@ type EpisodeLinks = {
     hasPrevious: boolean;
 };
 
+
+
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const { anime, episode } = req.query;
 

@@ -8,14 +8,140 @@ import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
 
 interface AnimeDetails {
-    title: string;
-    year: string;
-    image_url: string;
-    description: string;
-    genre: string;
-    status: string;
-    episodes: number;
+  id: string;
+  title: {
+    romaji: string;
+    english: string;
+    native: string;
+  };
+  malId: number;
+  synonyms: string[];
+  isLicensed: boolean;
+  isAdult: boolean;
+  countryOfOrigin: string;
+  trailer: {
+    id: string;
+    site: string;
+    thumbnail: string;
+    thumbnailHash: string;
+  };
+  image: string;
+  imageHash: string;
+  popularity: number;
+  color: string;
+  cover: string;
+  coverHash: string;
+  description: string;
+  status: string;
+  releaseDate: number;
+  startDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  endDate: {
+    year: number;
+    month: number;
+    day: number;
+  };
+  totalEpisodes: number;
+  currentEpisode: number;
+  rating: number;
+  duration: number;
+  genres: string[];
+  season: string;
+  studios: string[];
+  subOrDub: string;
+  type: string;
+  recommendations: Recommendation[];
+  characters: Character[];
+  relations: Relation[];
+  mappings: Mapping[];
+  artwork: Artwork[];
 }
+
+interface Recommendation {
+  id: number;
+  malId: number;
+  title: {
+    romaji: string;
+    english: string;
+    native: string;
+    userPreferred: string;
+  };
+  status: string;
+  episodes: number;
+  image: string;
+  imageHash: string;
+  cover: string;
+  coverHash: string;
+  rating: number;
+  type: string;
+}
+
+interface Character {
+  id: number;
+  role: string;
+  name: {
+    first: string;
+    last?: string;
+    full: string;
+    native: string;
+    userPreferred: string;
+  };
+  image: string;
+  imageHash: string;
+  voiceActors: VoiceActor[];
+}
+
+interface VoiceActor {
+  id: number;
+  language: string;
+  name: {
+    first: string;
+    last?: string;
+    full: string;
+    native?: string;
+    userPreferred: string;
+  };
+  image: string;
+  imageHash: string;
+}
+
+interface Relation {
+  id: number;
+  relationType: string;
+  malId: number;
+  title: {
+    romaji: string;
+    english?: string;
+    native: string;
+    userPreferred: string;
+  };
+  status: string;
+  episodes?: number;
+  image: string;
+  imageHash: string;
+  color: string;
+  type: string;
+  cover: string;
+  coverHash: string;
+  rating: number;
+}
+
+interface Mapping {
+  id: string;
+  providerId: string;
+  similarity: number;
+  providerType: string;
+}
+
+interface Artwork {
+  img: string;
+  type: string;
+  providerId: string;
+}
+
 
 const AnimePage: React.FC = () => {
     const router = useRouter();
@@ -35,7 +161,7 @@ const AnimePage: React.FC = () => {
         const fetchDetails = async () => {
             if (typeof id === 'string') {
                 try {
-                    const response = await axios.get(`/api/anime?keyword=${encodeURIComponent(id)}`);
+                    const response = await axios.get(`/api/anime?id=${encodeURIComponent(id)}`);
                     setDetails(response.data);
                 } catch (e) {
                     console.error('Failed to fetch anime details:', e);
@@ -80,7 +206,7 @@ const AnimePage: React.FC = () => {
             <KNHeader />
             <div className="min-h-screen bg-black text-white p-8 flex flex-col lg:flex-row items-center lg:items-start">
             <div className="flex-1 lg:pr-8">
-                <h1 className="text-4xl font-bold mb-4">{details.title}</h1>
+                <h1 className="text-4xl font-bold mb-4">{details.title.english}</h1>
                 <p className="text-lg mb-4">
                     {isExpanded ? details.description : `${details.description.slice(0, maxLength)}...`}
                     {details.description.length > maxLength && (
@@ -92,12 +218,12 @@ const AnimePage: React.FC = () => {
                         </button>
                     )}
                 </p>
-                <p className="text-md mb-2">Released: {details.year}</p>
-                <p className="text-md mb-2">Genre: {details.genre}</p>
+                <p className="text-md mb-2">Released: {details.releaseDate}</p>
+                <p className="text-md mb-2">Genre: {details.genres.map(genre => genre + ', ')}</p>
                 <p className="text-md mb-2">Status: {details.status}</p>
-                <p className="text-md mb-4">Episodes: {details.episodes}</p>
+                <p className="text-md mb-4">Episodes: {details.totalEpisodes}</p>
                 <div className="mb-8">
-                    {episodeRanges(details.episodes).map((range, index) => (
+                    {episodeRanges(details.totalEpisodes).map((range, index) => (
                         <button
                             key={index}
                             onClick={() => handleRangeClick(range)}
@@ -112,7 +238,7 @@ const AnimePage: React.FC = () => {
                         Array.from({ length: currentRange[1] - currentRange[0] + 1 }, (_, i) => i + currentRange[0]).map((episode) => (
                             <button
                                 key={episode}
-                                onClick={() =>  handleAnimeClick(`${id}/${episode}`)}
+                                onClick={() =>  handleAnimeClick(`/category/${details?.id}/${episode}`)}
                                 className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
                             >
                                 Ep {episode}
@@ -123,8 +249,8 @@ const AnimePage: React.FC = () => {
             <div className="lg:w-1/3 w-full mt-8 lg:mt-0">
                     <div className="relative">
                         <img
-                            src={details.image_url}
-                            alt={details.title}
+                            src={details.image}
+                            alt={details.title.english}
                             className="w-full h-auto rounded-lg shadow-lg"
                         />
                         <div className="absolute inset-0 bg-gradient-to-l from-transparent to-black rounded-lg"></div>
