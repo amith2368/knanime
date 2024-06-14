@@ -432,7 +432,7 @@ const EpisodePage = () => {
                         {/*NEXT/PREV Options*/}
 
                         <div className="flex justify-between m-8">
-                            {animeData.totalEpisodes > (parseInt(ep as string) + 1) && (
+                            {(parseInt(ep as string) - 1) >= 1 && (
                                 <button
                                     onClick={handlePreviousEpisode}
                                     className="bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm"
@@ -441,10 +441,10 @@ const EpisodePage = () => {
                                     &nbsp;Previous Episode
                                 </button>
                             )}
-                            {(parseInt(ep as string) - 1) >= 1 && (
+                            {animeData.totalEpisodes >= (parseInt(ep as string) + 1)  && (
                                 <button
                                     onClick={handleNextEpisode}
-                                    className={`bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm ${!((parseInt(ep as string) - 1) >= 1) ? 'ml-auto' : ''}`}
+                                    className={`bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm ${!(animeData.totalEpisodes > (parseInt(ep as string) + 1)) ? 'ml-auto' : ''}`}
                                 >
                                     Next Episode&nbsp;
                                     <FontAwesomeIcon icon={faArrowRight}/>

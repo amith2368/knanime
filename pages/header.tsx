@@ -20,7 +20,7 @@ const KNHeader: React.FC = () => {
     return (
         <header className="flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-white text-sm py-4 dark:bg-black">
             <nav className="max-w-[85rem] w-full mx-auto px-4 flex flex-wrap basis-full items-center justify-between" aria-label="Global">
-                <Link href="/">
+                <Link href="/home">
                     <img className="w-36 h-auto" src="/logo.png" alt="Logo"/>
                 </Link>
                 <div className="sm:order-3 flex items-center gap-x-2">

@@ -75,8 +75,8 @@ const Results: React.FC = () => {
         <div className={`animate-in fade-in min-h-screen bg-black text-white p-8 ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
 
             <div className="min-h-screen bg-black text-white p-8">
-                <h1 className="text-4xl font-bold mb-8 text-center">Anime Results</h1>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {/*<h1 className="text-4xl font-bold mb-8 text-center"></h1>*/}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                     {animes.map((anime, index) => (
                         <div key={index} onClick={() => handleAnimeClick(anime.id)} className="relative cursor-pointer overflow-hidden rounded-lg transform transition duration-500 hover:scale-105">
                             <div className="relative cursor-pointer overflow-hidden rounded-lg transform transition duration-500 hover:scale-105">
