@@ -18,6 +18,7 @@
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
     "hls.js": "^1.5.11",
+    "html-react-parser": "^5.1.10",
     "media-icons": "^1.1.4",
     "next": "14.2.3",
     "preline": "^2.3.0",

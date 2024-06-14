@@ -6,6 +6,7 @@ import axios from 'axios';
 import InfiniteScroll from 'react-infinite-scroll-component';
 import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
+import parse from 'html-react-parser';
 
 interface AnimeDetails {
   id: string;
@@ -208,7 +209,7 @@ const AnimePage: React.FC = () => {
             <div className="flex-1 lg:pr-8">
                 <h1 className="text-4xl font-bold mb-4">{details.title.english}</h1>
                 <p className="text-lg mb-4">
-                    {isExpanded ? details.description : `${details.description.slice(0, maxLength)}...`}
+                    {isExpanded ? parse(details.description) : parse(`${details.description.slice(0, maxLength)}...`)}
                     {details.description.length > maxLength && (
                         <button
                             onClick={toggleDescription}
@@ -218,10 +219,10 @@ const AnimePage: React.FC = () => {
                         </button>
                     )}
                 </p>
-                <p className="text-md mb-2">Released: {details.releaseDate}</p>
-                <p className="text-md mb-2">Genre: {details.genres.map(genre => genre + ', ')}</p>
-                <p className="text-md mb-2">Status: {details.status}</p>
-                <p className="text-md mb-4">Episodes: {details.totalEpisodes}</p>
+                <p className="text-md mb-2"><b>Released:</b> {details.releaseDate}</p>
+                <p className="text-md mb-2"><b>Genre:</b> {details.genres.map(genre => genre + ', ')}</p>
+                <p className="text-md mb-2"><b>Status:</b> {details.status}</p>
+                <p className="text-md mb-4"><b>Episodes:</b> {details.totalEpisodes}</p>
                 <div className="mb-8">
                     {episodeRanges(details.totalEpisodes).map((range, index) => (
                         <button
