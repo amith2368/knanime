@@ -1,13 +1,20 @@
 import type { AppProps } from 'next/app'
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
+import '@mantine/carousel/styles.css';
+import '@mantine/core/styles.css';
+import { createTheme, MantineProvider } from '@mantine/core';
+
+const theme = createTheme({
+  /** Put your mantine theme override here */
+});
 
 import '@/lib/fontawesome';
 import Head from "next/head";
 config.autoAddCss = false;
 
 export default function App({ Component, pageProps }: AppProps) {
-  return <>
+  return (<>
       <Head>
             <title>KNAnime</title>
             <meta property="og:title" content="Anime for the normies and otakus" key="title" />
@@ -32,6 +39,8 @@ export default function App({ Component, pageProps }: AppProps) {
             {/* Manifest file */}
             <link rel="manifest" href="/site.webmanifest" />
         </Head>
-      <Component {...pageProps} />
-    </>
+        <MantineProvider theme={theme}>
+        <Component {...pageProps} />
+        </MantineProvider>
+    </>);
 }

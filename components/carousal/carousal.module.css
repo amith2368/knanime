@@ -1,0 +1,56 @@
+.slide {
+  border-radius: 16px;
+  overflow: hidden;
+  background-size: cover;
+  background-position: center;
+  height: 400px; /* Adjust the height as needed */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+.image {
+  width: 100%;
+  height: auto;
+}
+
+.control {
+  border-radius: 50%;
+}
+
+
+.content {
+  max-width: 400px; /* Adjust as needed */
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.description {
+  margin-bottom: 20px;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background-color: white;
+  color: red;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.button:hover {
+  background-color: red;
+  color: white;
+  border: 1px solid red;
+}

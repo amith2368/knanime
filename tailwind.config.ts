@@ -23,6 +23,7 @@ const config: Config = {
     }),
     require('@tailwindcss/forms'),
     require('preline/plugin'),
+
   ],
 };
 

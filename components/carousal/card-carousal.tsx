@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { useRouter } from 'next/router';
-import 'tailwindcss/tailwind.css';
-import { useSwipeable } from 'react-swipeable';
-import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
-import {faArrowLeft, faArrowRight} from "@fortawesome/free-solid-svg-icons";
+import { Carousel } from '@mantine/carousel';
+import { useMediaQuery } from '@mantine/hooks';
+import { Paper, Text, Title, Button, useMantineTheme, rem } from '@mantine/core';
+import classes from './card-carousal.module.css';
+import {useRouter} from "next/router";
 
 interface CarouselItem  {
     id: string;
@@ -34,79 +33,69 @@ interface CardCarouselProps {
   items: CarouselItem[];
   title: string;
 }
+interface CardProps {
+  image: string;
+  title: string;
+  category: string;
+}
 
-const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+
+function Card({ id, image, title, type }: CarouselItem) {
   const router = useRouter();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-
-  const handleSwipeLeft = () => {
-    if (currentIndex < items.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-    }
-  };
-
-  const handleSwipeRight = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex(currentIndex - 1);
-    }
-  };
-
-  const handlers = useSwipeable({
-    onSwipedLeft: handleSwipeLeft,
-    onSwipedRight: handleSwipeRight,
-    trackMouse: true,
-  });
-
   const handleAnimeClick = (url: string) => {
-        setTimeout(() => {
-            setIsTransitioning(true);
-            router.push('/category/'+url);
-        }, 500); // Match this timeout with the CSS transition duration
+      router.push('/category/'+url);
     };
 
   return (
-      <div className={`animate-in fade-in min-h-screen bg-black text-white ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
-          <div {...handlers} className="relative w-full overflow-hidden">
-              <h1 className="text-4xl font-bold mb-4">{title}</h1>
-              <div className="flex transition-transform duration-500 ease-out gap-4"
-                   style={{transform: `translateX(-${currentIndex * 100}%)`}}>
-                  {items.map((item, index) => (
-                      <div key={index} onClick={() => handleAnimeClick(item.id)}
-                           className="flex-shrink-0 w-full md:w-1/3 lg:w-1/4 p-2 cursor-pointer overflow-hidden rounded-lg transform transition duration-500 hover:scale-105">
-                          <div
-                              className="relative cursor-pointer overflow-hidden rounded-lg transform transition duration-500 hover:scale-105">
-                              <img
-                                  src={item.image}
-                                  alt={item.title.english || item.title.userPreferred}
-                                  className="w-full h-full object-cover"
-                              />
-                              <div
-                                  className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black to-transparent text-white">
-                                  <h3 className="text-xl font-bold">{item.title.english || item.title.userPreferred}</h3>
-                                  <p className="text-sm">Released: {item.releaseDate}</p>
-                              </div>
-                          </div>
-                      </div>
-                  ))}
-              </div>
-              <button
-                  onClick={handleSwipeRight}
-                  className={`absolute left-0 top-1/2 transform -translate-y-1/2 p-2 bg-black rounded-full shadow-md ${currentIndex === 0 ? 'hidden' : ''}`}
-              >
-                  <FontAwesomeIcon icon={faArrowLeft}/>
-              </button>
-              <button
-                  onClick={handleSwipeLeft}
-                  className={`absolute right-0 top-1/2 transform -translate-y-1/2 p-2 bg-black rounded-full shadow-md ${currentIndex === items.length - 1 ? 'hidden' : ''}`}
-              >
-                  <FontAwesomeIcon icon={faArrowRight}/>
-              </button>
-          </div>
+    <Paper
+      shadow="md"
+      p="xl"
+      radius="md"
+      style={{ background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${image})` }}
+      className={classes.card}
+    >
+      <div>
+        <Text className={classes.category} size="xs">
+          {type}
+        </Text>
+        <Title order={3} className={classes.title}>
+          {title.english}
+        </Title>
       </div>
+      <Button variant="white" onClick={() => handleAnimeClick(id)} color="dark">
+        Watch
+      </Button>
+    </Paper>
+  );
+}
+
+
+const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
+  const theme = useMantineTheme();
+  const mobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
+  const slides = items.map((item) => (
+    <Carousel.Slide key={item.id}>
+      <Card {...item} />
+    </Carousel.Slide>
+  ));
+
+  return (
+    <>
+        <Title order={1} className="mt-10 mb-5">
+            {title}
+        </Title>
+        <Carousel
+          slideSize={{ base: '100%', sm: '30%', md: '30%' }}
+          slideGap={{ base: rem(3), sm: 'xl' }}
+          align="start"
+          slidesToScroll={mobile ? 1 : 2}
+        >
+          {slides}
+        </Carousel>
+    </>
 
   );
-};
+}
 
 export default CardCarousel;

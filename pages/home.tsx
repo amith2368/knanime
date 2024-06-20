@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
-import Carousel from "@/components/carousal/main-carousal";
+import MainCarousel from "@/components/carousal/main-carousal";
 import CardCarousel from "@/components/carousal/card-carousal";
 import axios from "axios";
 
@@ -74,10 +74,14 @@ const Home: React.FC = () => {
             <SpeedInsights/>
             <KNHeader />
 
+
             <div className={`container w-11/12 mx-auto`}>
-                {trendingAnime && <Carousel items={trendingAnime.slice(0, 5)}/>}
+                {trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}
                 {
-                    topAnime && <CardCarousel items={topAnime} title="Top Anime"/>
+                    topAnime &&
+                    <div className="mt-10">
+                        <CardCarousel items={topAnime} title="Top Anime"/>
+                    </div>
                 }
                 {
                     trendingAnime && <CardCarousel items={trendingAnime} title="Trending Anime"/>
