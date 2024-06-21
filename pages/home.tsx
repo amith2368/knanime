@@ -65,6 +65,9 @@ const Home: React.FC = () => {
         for (const id  in allPlaybackInfo) {
             if (allPlaybackInfo.hasOwnProperty(id)) {
                 const playbackInfo = allPlaybackInfo[id];
+                if (id == 'undefined') {
+                    continue;
+                }
                 lastWatchedAnime.push({
                     id: id,
                     ...playbackInfo
@@ -99,7 +102,7 @@ const Home: React.FC = () => {
             <div className={`container w-11/12 mx-auto`}>
                 {trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}
                 {
-                    recentAnime &&
+                    recentAnime && recentAnime.length > 0 &&
                     <div className="mt-10">
                         <WatchCarousel items={recentAnime} title="Continue Watching"/>
                     </div>
