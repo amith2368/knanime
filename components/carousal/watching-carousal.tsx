@@ -9,42 +9,21 @@ import React from "react";
 
 interface CarouselItem  {
     id: string;
-    malId: number;
-    title: {
-        romaji: string;
-        english: string;
-        native: string;
-        userPreferred: string;
-    }
-    status: string;
+    current_time: string;
+    ep: string;
     image: string;
-    imageHash: string;
-    cover: string;
-    coverHash: string;
-    popularity: number;
-    description: string;
-    rating: number;
-    genres: string[];
-    color: string;
-    totalEpisodes: number;
-    currentEpisodeCount: number;
-    type: string;
-    releaseDate: number;
+    title: string;
 }
 
 interface CardCarouselProps {
   items: CarouselItem[];
   title: string;
 }
-interface CardProps {
-  image: string;
-  title: string;
-  category: string;
-}
 
 
 
-function Card({ id, image, title, type }: CarouselItem) {
+
+function Card({ id, image, title, ep }: CarouselItem) {
   const router = useRouter();
   const handleAnimeClick = (url: string) => {
       router.push('/category/'+url);
@@ -56,25 +35,25 @@ function Card({ id, image, title, type }: CarouselItem) {
       p="xl"
       radius="md"
       style={{ background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${image})` }}
-      className={classes.card}
+      className={classes.watchcard}
     >
       <div>
-        <Text className={classes.category} size="xs">
-          {type}
-        </Text>
         <Title order={3} className={classes.title}>
-          {title.english}
+          {title}
         </Title>
+        <Text className={classes.episode} size="xs">
+          Episode {ep}
+        </Text>
       </div>
-      <Button className={classes.button} onClick={() => handleAnimeClick(id)} color="dark">
-         <FontAwesomeIcon icon={faPlay} /> &nbsp; Watch
+      <Button className={classes.button} onClick={() => handleAnimeClick(`${id}/${ep}`)} color="dark">
+        <FontAwesomeIcon icon={faPlay} /> &nbsp; Watch Episode
       </Button>
     </Paper>
   );
 }
 
 
-const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
+const WatchCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
   const theme = useMantineTheme();
   const mobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
   const slides = items.map((item) => (
@@ -89,7 +68,7 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
             {title}
         </Title>
         <Carousel
-          slideSize={{ base: '100%', sm: '30%', md: '20%' }}
+          slideSize={{ base: '100%', sm: '30%', md: '40%' }}
           slideGap={{ base: rem(3), sm: 'xl' }}
           align="start"
           slidesToScroll={mobile ? 1 : 2}
@@ -101,4 +80,4 @@ const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
   );
 }
 
-export default CardCarousel;
+export default WatchCarousel;

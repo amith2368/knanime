@@ -5,6 +5,7 @@ import { Carousel } from '@mantine/carousel';
 import 'tailwindcss/tailwind.css';
 import styles from './carousal.module.css';
 import { Button } from '@mantine/core';
+import { Text } from '@mantine/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlay, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
 import {useRouter} from "next/router";
@@ -58,7 +59,7 @@ const MainCarousel:React.FC<CardCarouselProps> = ({items}) => {
                 {/*<img src={item.cover} alt="cover" className={styles.image} />*/}
                 <div className={styles.content}>
                     <h2 className={styles.title}>{item.title.english}</h2>
-                    <p className={styles.description}>{parse(item.description.slice(0, 100) + '...')}</p>
+                    <Text lineClamp={4} className={styles.description}>{parse(item.description)}</Text>
                     <div className={styles.buttons}>
                         <Button className={styles.button} onClick={() => handleClick(`${item.id}/1`)} variant="white">
                             <FontAwesomeIcon icon={faPlay} /> &nbsp; Play

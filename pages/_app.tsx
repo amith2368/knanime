@@ -2,6 +2,7 @@ import type { AppProps } from 'next/app'
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import '@mantine/carousel/styles.css';
+import Layout from '../components/Layout';
 import '@mantine/core/styles.css';
 import { createTheme, MantineProvider } from '@mantine/core';
 
@@ -40,7 +41,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <link rel="manifest" href="/site.webmanifest" />
         </Head>
         <MantineProvider theme={theme}>
-        <Component {...pageProps} />
+        <Layout>
+            <Component {...pageProps} />
+        </Layout>
         </MantineProvider>
     </>);
 }

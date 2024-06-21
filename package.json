@@ -30,6 +30,7 @@
     "cheerio": "^1.0.0-rc.12",
     "embla-carousel-autoplay": "^7.1.0",
     "embla-carousel-react": "^7.1.0",
+    "framer-motion": "^11.2.11",
     "hls.js": "^1.5.11",
     "html-react-parser": "^5.1.10",
     "media-icons": "^1.1.4",

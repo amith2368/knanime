@@ -1,11 +1,27 @@
 import Link from 'next/link';
-import React, { useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import Router from 'next/router';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const KNHeader: React.FC = () => {
     const [query, setQuery] = useState<string>('');
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+    const searchInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+          if (event.ctrlKey && event.key === '/') {
+            event.preventDefault();
+            searchInputRef.current?.focus();
+          }
+        };
+
+        document.addEventListener('keydown', handleKeyDown);
+
+        return () => {
+          document.removeEventListener('keydown', handleKeyDown);
+        };
+      }, []);
 
     const handleSearch = () => {
         if (query.trim()) {
@@ -63,6 +79,7 @@ const KNHeader: React.FC = () => {
                             className="py-2 px-4 ps-11 pe-20 block w-92 md:w-96 bg-transparent border-gray-700 shadow-sm rounded-lg text-sm text-gray-300 focus:z-10 focus:border-red-900 focus:ring-red-700 placeholder:text-gray-500 dark:border-neutral-700 dark:text-neutral-500 dark:placeholder-neutral-500 dark:focus:ring-red-600"
                             placeholder="Search Anime..."
                             value={query}
+                            ref={searchInputRef}
                             onChange={(e) => setQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                         />

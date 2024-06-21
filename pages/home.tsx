@@ -9,6 +9,7 @@ import KNFooter from "@/pages/footer";
 import MainCarousel from "@/components/carousal/main-carousal";
 import CardCarousel from "@/components/carousal/card-carousal";
 import axios from "axios";
+import WatchCarousel from "@/components/carousal/watching-carousal";
 
 
 
@@ -18,10 +19,11 @@ const Home: React.FC = () => {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [topAnime, setTopAnime ] = useState<any[]>([]);
     const [trendingAnime, setTrendingAnime] = useState<any[]>([]);
-    const [recentAnime, setRecentAnime] = useState(null);
+    const [recentAnime, setRecentAnime] = useState<any[]>([]);
 
     useEffect(() => {
         const fetchDetails = async () => {
+            await lastWatchingAnime();
             await fetchTrendingAnime();
             await fetchTopAnime();
 
@@ -54,6 +56,25 @@ const Home: React.FC = () => {
             }
     }
 
+    async function lastWatchingAnime() {
+        // Retrieve the all_episode_times item from localStorage
+        const allPlaybackInfo = JSON.parse(localStorage.getItem('all_episode_times') || '{}');
+
+        const lastWatchedAnime = [];
+
+        for (const id  in allPlaybackInfo) {
+            if (allPlaybackInfo.hasOwnProperty(id)) {
+                const playbackInfo = allPlaybackInfo[id];
+                lastWatchedAnime.push({
+                    id: id,
+                    ...playbackInfo
+                })
+            }
+        }
+        setRecentAnime(lastWatchedAnime)
+    }
+
+
     const handleSearch = () => {
         setIsTransitioning(true);
         Router.push(`/results?query=${encodeURIComponent(query)}`);
@@ -77,6 +98,12 @@ const Home: React.FC = () => {
 
             <div className={`container w-11/12 mx-auto`}>
                 {trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}
+                {
+                    recentAnime &&
+                    <div className="mt-10">
+                        <WatchCarousel items={recentAnime} title="Continue Watching"/>
+                    </div>
+                }
                 {
                     topAnime &&
                     <div className="mt-10">

@@ -151,6 +151,7 @@ const AnimePage: React.FC = () => {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [currentRange, setCurrentRange] = useState<[number, number] | null>(null);
     const [isExpanded, setIsExpanded] = useState(false);
+    const [watchedEpisodes, setWatchedEpisodes] = useState<any[]>([]);
 
     const maxLength = 200; // Number of characters to show initially
 
@@ -163,11 +164,20 @@ const AnimePage: React.FC = () => {
             if (typeof id === 'string') {
                 try {
                     const response = await axios.get(`/api/anime?id=${encodeURIComponent(id)}`);
+                    const watched = getEpisodesWatched(id);
+                    setWatchedEpisodes(watched);
                     setDetails(response.data);
                 } catch (e) {
                     console.error('Failed to fetch anime details:', e);
                 }
             }
+        };
+
+        const getEpisodesWatched = (id: string) => {
+            // Retrieve the all_episodes_watched item from localStorage
+            const allEpisodesWatched = JSON.parse(localStorage.getItem('all_episodes_watched') || '{}');
+            // Return the list of episodes watched for the specific id, or an empty array if the id does not exist
+            return allEpisodesWatched[id as string] || [];
         };
 
         fetchDetails();
@@ -240,7 +250,7 @@ const AnimePage: React.FC = () => {
                             <button
                                 key={episode}
                                 onClick={() =>  handleAnimeClick(`/category/${details?.id}/${episode}`)}
-                                className="bg-gray-700 hover:bg-gray-800 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                                className={`bg-gray-700 hover:bg-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out ${watchedEpisodes.includes(episode.toString()) ? 'bg-gray-700' : 'bg-red-600'}`}
                             >
                                 Ep {episode}
                             </button>

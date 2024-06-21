@@ -72,7 +72,7 @@ interface AnimeDetails {
   relations: Relation[];
   mappings: Mapping[];
   artwork: Artwork[];
-  episodes: any;
+  episodes: Episode[];
 }
 
 interface Recommendation {
@@ -181,12 +181,15 @@ type FetchSkipTimesResponse = {
     results: SkipTime[];
 };
 
+
+
 const EpisodePage = () => {
     const API_URI = 'https://knanime-api.vercel.app'
     const router = useRouter();
     const player = useRef<MediaPlayerInstance>(null);
     const { id, ep } = router.query;
     const [animeData, setAnimeData] = useState<AnimeDetails | null>(null);
+    const [episodeData, setEpisodeData] = useState<Episode | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
     const [ hlsSource, setHlsSource] = useState('')
@@ -194,11 +197,57 @@ const EpisodePage = () => {
     const [ autoSkip, setAutoSkip ] = useState<boolean>(false);
     const [ autoNext, setAutoNext] = useState<boolean>(true);
     const [ skipTimes, setSkipTimes ] = useState<SkipTime[]>([]);
+    const [currentTime, setCurrentTime] = useState<number>(0);
 
-    const toggleAutoSkip = () => setAutoSkip(!autoSkip);
-    const toggleAutoPlay = () => setAutoSkip(!autoPlay);
+    const toggleAutoSkip = () => {
+        const newAutoSkip = !autoSkip;
+        setAutoSkip(newAutoSkip);
+        localStorage.setItem('autoSkip', JSON.stringify(newAutoSkip));
+    }
+    const toggleAutoPlay = () => {
+        const newAutoPlay = !autoPlay;
+        setAutoSkip(newAutoPlay);
+        localStorage.setItem('autoPlay', JSON.stringify(newAutoPlay));
+    }
 
-    const toggleAutoNext = () => setAutoNext(!autoNext);
+    const toggleAutoNext = () => {
+        const newAutoNext = !autoNext;
+        setAutoNext(!autoNext);
+         localStorage.setItem('autoNext', JSON.stringify(newAutoNext));
+    }
+
+    const getSettings = () => {
+        const storedAutoSkip: string | null = localStorage.getItem('autoSkip');
+        const storedAutoNext: string | null = localStorage.getItem('autoNext');
+
+        if (storedAutoSkip !== null) {
+            setAutoSkip(JSON.parse(storedAutoSkip));
+        }
+
+        if (storedAutoNext !== null) {
+            setAutoNext(JSON.parse(storedAutoNext));
+        }
+    }
+
+    useEffect(() => {
+        updateEpisodesWatched();
+        getCurrentTimeFromLocal();
+        getSettings();
+        if (player.current && currentTime) {
+          player.current.currentTime = currentTime;
+
+        }
+      }, [currentTime]);
+
+    useEffect(() => {
+        if (autoPlay && player.current) {
+          player.current
+            .play()
+            .catch((e) =>
+              console.log('Playback failed to start automatically:', e),
+            );
+        }
+      }, [autoPlay, hlsSource]);
 
     function onProviderChange(
         provider: MediaProviderAdapter | null,
@@ -214,6 +263,26 @@ const EpisodePage = () => {
             const current_time = player.current.currentTime;
             const duration = player.current.duration || 1;
             const playbackPercentage = (current_time / duration);
+
+            if (episodeData && animeData) {
+                const image = episodeData.image;
+                const title = animeData.title.english;
+                const playbackInfo = {
+                    current_time,
+                    ep,
+                    image,
+                    title
+                };
+                const allPlaybackInfo = JSON.parse(
+                    localStorage.getItem('all_episode_times') || '{}',
+                );
+                allPlaybackInfo[id as string] = playbackInfo;
+                localStorage.setItem(
+                    'all_episode_times',
+                    JSON.stringify(allPlaybackInfo),
+                );
+            }
+
             if (autoSkip && skipTimes.length > 0) {
                 const skipInterval = skipTimes.find(
                   ({ interval }) =>
@@ -240,6 +309,10 @@ const EpisodePage = () => {
                     // const provider = fetchedAnimeData.episodes.find((episode) => episode.number === parseInt(ep as string));
                     const episodes = await fetchEpisodes(fetchedAnimeData.id);
                     const currentEpisode = episodes?.find(e => e.number === parseInt(ep as string));
+                    if (currentEpisode) {
+                        setEpisodeData(currentEpisode);
+                    }
+
                     // @ts-ignore
                     await fetchStreamData(currentEpisode.id);
                 }
@@ -249,9 +322,11 @@ const EpisodePage = () => {
                 setIsLoading(false);
             }
         };
-
         fetchVideoData();
+
     }, [id, ep]);
+
+
 
     async function fetchEpisodes (id: string | undefined,
                                   dub: boolean = false,
@@ -282,22 +357,38 @@ const EpisodePage = () => {
 
     }
 
-    // useEffect(() => {
-    //      // @ts-ignore
-    //     const url = `https://knanime-api.vercel.app/anime/gogoanime/watch/${encodeURIComponent(id)}-episode-${encodeURIComponent(ep)}`;
-    //     const fetchStreamData = async () => {
-    //         try {
-    //             const { data } = await axios.get(url, { params: { server: "gogocdn" } });
-    //             const sources = data['sources'];
-    //             const defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
-    //             setHlsSource(defaultSource['url']);
-    //             setIsLoading(false);
-    //         } catch (err) {
-    //             console.log(err)
-    //         }
-    //     };
-    //     fetchStreamData();
-    // }, [id, ep]);
+    // Function to get current_time for a specific id
+    function getCurrentTimeFromLocal() {
+        // Retrieve the all_episode_times item from localStorage
+        const allPlaybackInfo = JSON.parse(localStorage.getItem('all_episode_times') || '{}');
+
+        // Check if the id exists in the allPlaybackInfo
+        if (allPlaybackInfo[id as string]) {
+            // Extract the playbackInfo for the specific id
+            const playbackInfo = allPlaybackInfo[id as string];
+            // Return the current_time
+            setCurrentTime(playbackInfo.current_time);
+        }
+    }
+
+    function updateEpisodesWatched() {
+        // Retrieve the all_episodes_watched item from localStorage
+        const allEpisodesWatched = JSON.parse(localStorage.getItem('all_episodes_watched') || '{}');
+        const animeId = id as string;
+        // Check if the id exists in the allEpisodesWatched
+        if (allEpisodesWatched[animeId]) {
+            // If the id exists, add the episode to the list if it's not already present
+            if (!allEpisodesWatched[animeId].includes(ep)) {
+                allEpisodesWatched[animeId].push(ep);
+            }
+        } else {
+            // If the id does not exist, create a new list with the episode
+            allEpisodesWatched[animeId] = [ep];
+        }
+
+        // Store the updated allEpisodesWatched back to localStorage
+        localStorage.setItem('all_episodes_watched', JSON.stringify(allEpisodesWatched));
+    }
 
 
     useEffect(() => {
@@ -392,8 +483,14 @@ const EpisodePage = () => {
                                     src={hlsSource}
                                     autoPlay={autoPlay}
                                     ref={player}
+
                                     onTimeUpdate={onTimeUpdate}
                                     onProviderChange={onProviderChange}
+                                    aspectRatio='16/9'
+                                    load='eager'
+                                    posterLoad='eager'
+                                    streamType='on-demand'
+                                    storage='storage-key'
                                     keyTarget='player'
                                     onEnded={handleEpisodeEnded}
                                 >
