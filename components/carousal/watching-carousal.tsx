@@ -34,7 +34,7 @@ function Card({ id, image, title, ep }: CarouselItem) {
       shadow="md"
       p="xl"
       radius="md"
-      style={{ background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${image})` }}
+      style={{ background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${image})`}}
       className={classes.watchcard}
     >
       <div>

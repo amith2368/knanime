@@ -65,7 +65,7 @@ const Home: React.FC = () => {
         for (const id  in allPlaybackInfo) {
             if (allPlaybackInfo.hasOwnProperty(id)) {
                 const playbackInfo = allPlaybackInfo[id];
-                if (id == 'undefined') {
+                if (id == 'undefined' || !playbackInfo['ep']) {
                     continue;
                 }
                 lastWatchedAnime.push({

@@ -15,10 +15,11 @@ import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {useRouter} from 'next/router';
 import React, {useEffect, useRef, useState} from 'react';
-import axios from 'axios';
+import axios, {all} from 'axios';
 import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
 import Episode from "@/pages/api/episode";
+import Link from "next/link";
 
 
 interface AnimeDetails {
@@ -189,6 +190,7 @@ const EpisodePage = () => {
     const player = useRef<MediaPlayerInstance>(null);
     const { id, ep } = router.query;
     const [animeData, setAnimeData] = useState<AnimeDetails | null>(null);
+    const [allEpisodes, setAllEpisodes] = useState<Episode[]>([]);
     const [episodeData, setEpisodeData] = useState<Episode | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
@@ -229,6 +231,7 @@ const EpisodePage = () => {
         }
     }
 
+    // UseEffect to get the current watched time and settings
     useEffect(() => {
         updateEpisodesWatched();
         getCurrentTimeFromLocal();
@@ -239,6 +242,7 @@ const EpisodePage = () => {
         }
       }, [currentTime]);
 
+    // UseEffect to get play the video automatically and tracking
     useEffect(() => {
         if (autoPlay && player.current) {
           player.current
@@ -249,10 +253,18 @@ const EpisodePage = () => {
         }
       }, [autoPlay, hlsSource]);
 
+
     function onProviderChange(
         provider: MediaProviderAdapter | null,
         _nativeEvent: MediaProviderChangeEvent,
       ) {
+        /**
+         * Updates the configuration of the provided HLS provider.
+         *
+         * @param {MediaProviderAdapter | null} provider - The HLS provider to update.
+         * @param {MediaProviderChangeEvent} _nativeEvent - The native event associated with the provider change.
+         * @return {void} This function does not return anything.
+         */
         if (isHLSProvider(provider)) {
           provider.config = {};
         }
@@ -295,26 +307,35 @@ const EpisodePage = () => {
         }
     }
 
+    // Get the Anime Data
     useEffect(() => {
         const fetchVideoData = async () => {
             if (!id || !ep) return;
 
             try {
-                // @ts-ignore
-                const response = await axios.get(`/api/anime?id=${encodeURIComponent(id)}`);
-                if (response.data) {
-                    const fetchedAnimeData = response.data as AnimeDetails;
-                    setAnimeData(fetchedAnimeData);
-                    // console.log(fetchedAnimeData);
-                    // const provider = fetchedAnimeData.episodes.find((episode) => episode.number === parseInt(ep as string));
-                    const episodes = await fetchEpisodes(fetchedAnimeData.id);
-                    const currentEpisode = episodes?.find(e => e.number === parseInt(ep as string));
+                // Check if allEpisodes already has data
+                if (allEpisodes.length > 0) {
+                    console.log(allEpisodes);
+                    const currentEpisode = allEpisodes.find(e => e.number === parseInt(ep as string));
                     if (currentEpisode) {
                         setEpisodeData(currentEpisode);
+                        await fetchStreamData(currentEpisode.id);
                     }
-
-                    // @ts-ignore
-                    await fetchStreamData(currentEpisode.id);
+                } else {
+                    const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`);
+                    if (response.data) {
+                        const fetchedAnimeData = response.data as AnimeDetails;
+                        setAnimeData(fetchedAnimeData);
+                        const episodes = await fetchEpisodes(fetchedAnimeData.id);
+                        if (episodes) {
+                            setAllEpisodes(episodes);
+                            const currentEpisode = episodes.find(e => e.number === parseInt(ep as string));
+                            if (currentEpisode) {
+                                setEpisodeData(currentEpisode);
+                                await fetchStreamData(currentEpisode.id);
+                            }
+                        }
+                    }
                 }
             } catch (err) {
                 console.error('Failed to fetch video:', err);
@@ -322,24 +343,23 @@ const EpisodePage = () => {
                 setIsLoading(false);
             }
         };
-        fetchVideoData();
 
+        async function fetchEpisodes(id: string | undefined, dub: boolean = false, provider: string = 'gogoanime') {
+            if (id === undefined) return;
+            const params = new URLSearchParams({ provider, dub: dub ? 'true' : 'false' });
+            const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
+
+            const { data } = await axios.get(url);
+            return data as Episode[];
+        }
+
+        fetchVideoData();
     }, [id, ep]);
 
 
 
-    async function fetchEpisodes (id: string | undefined,
-                                  dub: boolean = false,
-                                  provider: string = 'gogoanime'
-    ) {
-        if (id === undefined) return;
 
-        const params = new URLSearchParams({ provider, dub: dub ? 'true' : 'false' });
-        const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
 
-        const { data } = await axios.get(url);
-        return data as Episode[];
-    }
 
     async function fetchStreamData (id: string) {
         if (id === undefined) return;
@@ -416,6 +436,10 @@ const EpisodePage = () => {
     fetchSkipTimes();
   }, [ep, animeData]);
 
+
+    const getEpisodeByNumber = (episodes: Episode[], number: number) => {
+        return episodes.find(e => e.number === number);
+    };
 
     const handleNextEpisode = () => {
         if (animeData && animeData.totalEpisodes > (parseInt(ep as string) + 1)) {
@@ -530,22 +554,22 @@ const EpisodePage = () => {
 
                         <div className="flex justify-between m-8">
                             {(parseInt(ep as string) - 1) >= 1 && (
-                                <button
-                                    onClick={handlePreviousEpisode}
+                                <Link
+                                    href={`/category/${id}/${parseInt(ep as string) - 1}`}
                                     className="bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm"
                                 >
                                     <FontAwesomeIcon icon={faArrowLeft}/>
                                     &nbsp;Previous Episode
-                                </button>
+                                </Link>
                             )}
                             {animeData.totalEpisodes >= (parseInt(ep as string) + 1)  && (
-                                <button
-                                    onClick={handleNextEpisode}
+                                <div>
+                                  <Link href={`/category/${id}/${parseInt(ep as string) + 1}`}
                                     className={`bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm ${!(animeData.totalEpisodes > (parseInt(ep as string) + 1)) ? 'ml-auto' : ''}`}
-                                >
+                                  >
                                     Next Episode&nbsp;
-                                    <FontAwesomeIcon icon={faArrowRight}/>
-                                </button>
+                                  <FontAwesomeIcon icon={faArrowRight}/></Link>
+                                </div>
                             )}
                         </div>
 
