@@ -19,6 +19,7 @@ import axios, {all} from 'axios';
 import KNHeader from "@/pages/header";
 import KNFooter from "@/pages/footer";
 import Episode from "@/pages/api/episode";
+import { redirect } from "next/navigation";
 import Link from "next/link";
 
 
@@ -188,7 +189,7 @@ const EpisodePage = () => {
     const API_URI = 'https://knanime-api.vercel.app'
     const router = useRouter();
     const player = useRef<MediaPlayerInstance>(null);
-    const { id, ep } = router.query;
+    let { id, ep } = router.query;
     const [animeData, setAnimeData] = useState<AnimeDetails | null>(null);
     const [allEpisodes, setAllEpisodes] = useState<Episode[]>([]);
     const [episodeData, setEpisodeData] = useState<Episode | null>(null)
@@ -313,15 +314,22 @@ const EpisodePage = () => {
             if (!id || !ep) return;
 
             try {
-                // Check if allEpisodes already has data
-                if (allEpisodes.length > 0) {
-                    console.log(allEpisodes);
-                    const currentEpisode = allEpisodes.find(e => e.number === parseInt(ep as string));
+                // Check if animeData and episode data in localStorage
+                const local_allEpisodes = JSON.parse(localStorage.getItem('current_episodes_data') || '{}');
+                const local_animeData = JSON.parse(localStorage.getItem('current_anime_data') || '{}');
+                // Check if the animeData has the same id
+                if (local_animeData && local_animeData.id === id) {
+                    console.log("Got prev data");
+                    console.log(local_allEpisodes);
+                    setAnimeData(local_animeData);
+                    setAllEpisodes(local_allEpisodes);
+                    const currentEpisode = local_allEpisodes.find((e: { number: number; }) => e.number === parseInt(ep as string));
                     if (currentEpisode) {
                         setEpisodeData(currentEpisode);
                         await fetchStreamData(currentEpisode.id);
                     }
                 } else {
+                    console.log("Running new fetch");
                     const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`);
                     if (response.data) {
                         const fetchedAnimeData = response.data as AnimeDetails;
@@ -333,6 +341,8 @@ const EpisodePage = () => {
                             if (currentEpisode) {
                                 setEpisodeData(currentEpisode);
                                 await fetchStreamData(currentEpisode.id);
+                                localStorage.setItem('current_anime_data', JSON.stringify(fetchedAnimeData));
+                                localStorage.setItem('current_episodes_data', JSON.stringify(episodes));
                             }
                         }
                     }
@@ -355,10 +365,6 @@ const EpisodePage = () => {
 
         fetchVideoData();
     }, [id, ep]);
-
-
-
-
 
 
     async function fetchStreamData (id: string) {
@@ -443,14 +449,14 @@ const EpisodePage = () => {
 
     const handleNextEpisode = () => {
         if (animeData && animeData.totalEpisodes > (parseInt(ep as string) + 1)) {
-            router.push(`/category/${id}/${parseInt(ep as string) + 1}`);
+            router.push(`/category/${id}/episode?id=${id}&ep=${parseInt(ep as string) + 1}`, undefined, {shallow: true});
         }
     };
 
 
     const handlePreviousEpisode = () => {
         if (animeData && (parseInt(ep as string) - 1) >= 1) {
-            router.push(`/category/${id}/${parseInt(ep as string) - 1}`);
+            router.push(`/category/${id}/episode?id=${id}&ep=${parseInt(ep as string) - 1}`);
         }
     };
 
@@ -554,21 +560,22 @@ const EpisodePage = () => {
 
                         <div className="flex justify-between m-8">
                             {(parseInt(ep as string) - 1) >= 1 && (
-                                <Link
-                                    href={`/category/${id}/${parseInt(ep as string) - 1}`}
+                                <button
+                                     onClick={handlePreviousEpisode}
                                     className="bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm"
                                 >
                                     <FontAwesomeIcon icon={faArrowLeft}/>
                                     &nbsp;Previous Episode
-                                </Link>
+                                </button>
                             )}
                             {animeData.totalEpisodes >= (parseInt(ep as string) + 1)  && (
                                 <div>
-                                  <Link href={`/category/${id}/${parseInt(ep as string) + 1}`}
+                                  <button onClick={handleNextEpisode}
                                     className={`bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm ${!(animeData.totalEpisodes > (parseInt(ep as string) + 1)) ? 'ml-auto' : ''}`}
                                   >
                                     Next Episode&nbsp;
-                                  <FontAwesomeIcon icon={faArrowRight}/></Link>
+                                    <FontAwesomeIcon icon={faArrowRight}/>
+                                  </button>
                                 </div>
                             )}
                         </div>

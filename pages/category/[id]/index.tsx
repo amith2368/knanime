@@ -249,7 +249,7 @@ const AnimePage: React.FC = () => {
                         Array.from({ length: currentRange[1] - currentRange[0] + 1 }, (_, i) => i + currentRange[0]).map((episode) => (
                             <button
                                 key={episode}
-                                onClick={() =>  handleAnimeClick(`/category/${details?.id}/${episode}`)}
+                                onClick={() =>  handleAnimeClick(`/category/${details?.id}/episode?id=${details?.id}&ep=${episode}`)}
                                 className={`bg-gray-700 hover:bg-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out ${watchedEpisodes.includes(episode.toString()) ? 'bg-gray-700' : 'bg-red-600'}`}
                             >
                                 Ep {episode}
