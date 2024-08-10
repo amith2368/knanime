@@ -61,10 +61,10 @@ const MainCarousel:React.FC<CardCarouselProps> = ({items}) => {
                     <h2 className={styles.title}>{item.title.english}</h2>
                     <Text lineClamp={4} className={styles.description}>{parse(item.description)}</Text>
                     <div className={styles.buttons}>
-                        <Button className={styles.button} onClick={() => handleClick(`${item.id}/1`)} variant="white">
+                        <Button className={styles.button} onClick={() => handleClick(`${item.id}/episode?id=${item.id}&ep=1`)} variant="white">
                             <FontAwesomeIcon icon={faPlay} /> &nbsp; Play
                         </Button>
-                        <Button className={styles.button} onClick={() => handleClick(`${item.id}/1`)} variant="white">
+                        <Button className={styles.button} onClick={() => handleClick(`${item.id}`)} variant="white">
                             <FontAwesomeIcon icon={faInfoCircle}/> &nbsp; More Info
                         </Button>
                     </div>

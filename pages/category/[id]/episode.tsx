@@ -8,7 +8,9 @@ import {
     MediaPlayerInstance,
     MediaProvider,
     MediaProviderAdapter,
-    MediaProviderChangeEvent
+    MediaProviderChangeEvent,
+    Track,
+    type VTTContent
 } from '@vidstack/react';
 import {PlyrLayout, plyrLayoutIcons} from '@vidstack/react/player/layouts/plyr';
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
@@ -195,12 +197,24 @@ const EpisodePage = () => {
     const [episodeData, setEpisodeData] = useState<Episode | null>(null)
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState('');
-    const [ hlsSource, setHlsSource] = useState('')
+    const [ hlsSource, setHlsSource] = useState('');
+    const [ subtitles, setSubtitles] = useState<string>('');
+    const [ thumbnails, setThumbnails] = useState<string>();
     const [ autoPlay, setAutoPlay] = useState<boolean>(true);
     const [ autoSkip, setAutoSkip ] = useState<boolean>(false);
     const [ autoNext, setAutoNext] = useState<boolean>(true);
     const [ skipTimes, setSkipTimes ] = useState<SkipTime[]>([]);
     const [currentTime, setCurrentTime] = useState<number>(0);
+
+
+
+    const content: VTTContent = {
+      cues: [
+        { startTime: 0, endTime: 5, text: 'Moshi' },
+        { startTime: 5, endTime: 10, text: 'LaMoshi' },
+      ],
+    };
+
 
     const toggleAutoSkip = () => {
         const newAutoSkip = !autoSkip;
@@ -267,7 +281,9 @@ const EpisodePage = () => {
          * @return {void} This function does not return anything.
          */
         if (isHLSProvider(provider)) {
-          provider.config = {};
+          provider.config = {
+
+          };
         }
       }
 
@@ -354,7 +370,7 @@ const EpisodePage = () => {
             }
         };
 
-        async function fetchEpisodes(id: string | undefined, dub: boolean = false, provider: string = 'gogoanime') {
+        async function fetchEpisodes(id: string | undefined, dub: boolean = false, provider: string = 'zoro') {
             if (id === undefined) return;
             const params = new URLSearchParams({ provider, dub: dub ? 'true' : 'false' });
             const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
@@ -370,12 +386,17 @@ const EpisodePage = () => {
     async function fetchStreamData (id: string) {
         if (id === undefined) return;
 
-        const url = `${API_URI}/anime/gogoanime/watch/${encodeURIComponent(id)}`;
+        const url = `${API_URI}/meta/anilist/watch/${encodeURIComponent(id)}`;
         try {
-                const { data } = await axios.get(url, { params: { server: "gogocdn" } });
+                const { data } = await axios.get(url, { params: { provider: "zoro" } });
                 const sources = data['sources'];
-                const defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
-                setHlsSource(defaultSource['url']);
+                const defaultSource = sources.find(((source: { type: string; }) => source.type === 'hls'));
+                const subtitles = data['subtitles'];
+                const defaultSubtitle = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'English'));
+                const defaultThumbnail = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'Thumbnails'));
+                setHlsSource(`https://cors.zimjs.com/${defaultSource['url']}`);
+                setSubtitles(defaultSubtitle['url']);
+                setThumbnails(defaultThumbnail['url']);
                 setIsLoading(false);
             } catch (err) {
                 console.log(err)
@@ -417,30 +438,30 @@ const EpisodePage = () => {
     }
 
 
-    useEffect(() => {
-    const fetchSkipTimes = async () => {
-      try {
-        console.log(animeData?.malId)
-        const response = await axios.get('/api/aniskip', {
-          params: {
-            malId: animeData?.malId,
-            episodeNumber: ep,
-            episodeLength: 0,
-          },
-        });
-        const st: FetchSkipTimesResponse = response.data;
-        const filteredSkipTimes = st.results.filter(
-          ({ skipType }) => skipType === 'op' || skipType === 'ed',
-        );
-        setSkipTimes(filteredSkipTimes)
-
-      } catch (error) {
-        console.error('Error fetching skip times:', error);
-      }
-    };
-
-    fetchSkipTimes();
-  }, [ep, animeData]);
+  //   useEffect(() => {
+  //   const fetchSkipTimes = async () => {
+  //     try {
+  //       console.log(animeData?.malId)
+  //       const response = await axios.get('/api/aniskip', {
+  //         params: {
+  //           malId: animeData?.malId,
+  //           episodeNumber: ep,
+  //           episodeLength: 0,
+  //         },
+  //       });
+  //       const st: FetchSkipTimesResponse = response.data;
+  //       const filteredSkipTimes = st.results.filter(
+  //         ({ skipType }) => skipType === 'op' || skipType === 'ed',
+  //       );
+  //       setSkipTimes(filteredSkipTimes)
+  //
+  //     } catch (error) {
+  //       console.error('Error fetching skip times:', error);
+  //     }
+  //   };
+  //
+  //   fetchSkipTimes();
+  // }, [ep, animeData]);
 
 
     const getEpisodeByNumber = (episodes: Episode[], number: number) => {
@@ -527,7 +548,10 @@ const EpisodePage = () => {
                                     <MediaProvider/>
                                     <PlyrLayout
                                         icons={plyrLayoutIcons}
+                                        thumbnails={thumbnails}
                                     />
+                                    <Track src={subtitles} kind="subtitles" label="English" lang="en-US" default />
+
                                 </MediaPlayer>
                             </div>
                         </div>
