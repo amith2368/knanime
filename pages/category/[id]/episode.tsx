@@ -1,7 +1,10 @@
 import "../../../app/globals.css";
 import "./player.css"
-import '@vidstack/react/player/styles/base.css';
-import '@vidstack/react/player/styles/plyr/theme.css';
+// import '@vidstack/react/player/styles/base.css';
+// import '@vidstack/react/player/styles/plyr/theme.css';
+
+import '@vidstack/react/player/styles/default/theme.css';
+import '@vidstack/react/player/styles/default/layouts/video.css';
 import {
     isHLSProvider,
     MediaPlayer,
@@ -12,7 +15,10 @@ import {
     Track,
     type VTTContent
 } from '@vidstack/react';
-import {PlyrLayout, plyrLayoutIcons} from '@vidstack/react/player/layouts/plyr';
+
+// import {PlyrLayout, plyrLayoutIcons} from '@vidstack/react/player/layouts/plyr';
+import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
+
 import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
 import {useRouter} from 'next/router';
@@ -203,17 +209,13 @@ const EpisodePage = () => {
     const [ autoPlay, setAutoPlay] = useState<boolean>(true);
     const [ autoSkip, setAutoSkip ] = useState<boolean>(false);
     const [ autoNext, setAutoNext] = useState<boolean>(true);
-    const [ skipTimes, setSkipTimes ] = useState<SkipTime[]>([]);
+    const [ skipTimes, setSkipTimes ] = useState<VTTContent>({
+        cues: [
+            { startTime: 0, endTime: 5, text: '...' }
+        ],
+    });
     const [currentTime, setCurrentTime] = useState<number>(0);
 
-
-
-    const content: VTTContent = {
-      cues: [
-        { startTime: 0, endTime: 5, text: 'Moshi' },
-        { startTime: 5, endTime: 10, text: 'LaMoshi' },
-      ],
-    };
 
 
     const toggleAutoSkip = () => {
@@ -312,13 +314,13 @@ const EpisodePage = () => {
                 );
             }
 
-            if (autoSkip && skipTimes.length > 0) {
-                const skipInterval = skipTimes.find(
-                  ({ interval }) =>
-                    current_time >= interval.startTime && current_time < interval.endTime,
+            if (autoSkip && skipTimes) {
+                const skipInterval = skipTimes.cues?.find(
+                  ({ startTime, endTime }) =>
+                    current_time >= startTime && current_time < endTime,
                 );
                 if (skipInterval) {
-                  player.current.currentTime = skipInterval.interval.endTime;
+                  player.current.currentTime = skipInterval.endTime;
                 }
             }
         }
@@ -389,14 +391,23 @@ const EpisodePage = () => {
         const url = `${API_URI}/meta/anilist/watch/${encodeURIComponent(id)}`;
         try {
                 const { data } = await axios.get(url, { params: { provider: "zoro" } });
-                const sources = data['sources'];
+                const {sources, subtitles, intro, outro } = data;
                 const defaultSource = sources.find(((source: { type: string; }) => source.type === 'hls'));
-                const subtitles = data['subtitles'];
+                // const subtitles = data['subtitles'];
                 const defaultSubtitle = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'English'));
                 const defaultThumbnail = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'Thumbnails'));
+                const skipCues = [
+                    { startTime: intro.start, endTime: intro.end, text: 'Intro' },
+                    { startTime: outro.start, endTime: outro.end, text: 'Outro' },
+                ]
+
                 setHlsSource(`https://cors.zimjs.com/${defaultSource['url']}`);
                 setSubtitles(defaultSubtitle['url']);
                 setThumbnails(defaultThumbnail['url']);
+                setSkipTimes({
+                    cues: skipCues
+                })
+
                 setIsLoading(false);
             } catch (err) {
                 console.log(err)
@@ -546,12 +557,13 @@ const EpisodePage = () => {
                                     onEnded={handleEpisodeEnded}
                                 >
                                     <MediaProvider/>
-                                    <PlyrLayout
-                                        icons={plyrLayoutIcons}
-                                        thumbnails={thumbnails}
-                                    />
+                                    {/*<PlyrLayout*/}
+                                    {/*    icons={plyrLayoutIcons}*/}
+                                    {/*    thumbnails={thumbnails}*/}
+                                    {/*/>*/}
+                                    <DefaultVideoLayout thumbnails={thumbnails} icons={defaultLayoutIcons} />
                                     <Track src={subtitles} kind="subtitles" label="English" lang="en-US" default />
-
+                                    <Track content={skipTimes} kind="chapters" label="English" lang="en-US" default />
                                 </MediaPlayer>
                             </div>
                         </div>

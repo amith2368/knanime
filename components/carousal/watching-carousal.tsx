@@ -45,7 +45,7 @@ function Card({ id, image, title, ep }: CarouselItem) {
           Episode {ep}
         </Text>
       </div>
-      <Button className={classes.button} onClick={() => handleAnimeClick(`${id}/${ep}`)} color="dark">
+      <Button className={classes.button} onClick={() => handleAnimeClick(`${id}/episode?id=${id}&ep=${ep}`)} color="dark">
         <FontAwesomeIcon icon={faPlay} /> &nbsp; Watch Episode
       </Button>
     </Paper>
