@@ -1,6 +1,13 @@
 import Link from 'next/link';
 import React, {useEffect, useRef, useState} from "react";
 import Router from 'next/router';
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const KNHeader: React.FC = () => {
@@ -58,7 +65,14 @@ const KNHeader: React.FC = () => {
                     </button>
                     <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:block`}>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end py-2 md:py-0 sm:ps-7">
-                            <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500" href="#">Under Development</a>
+                            <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500" href="#">
+                                <SignedOut>
+                                    <SignInButton />
+                                </SignedOut>
+                                <SignedIn>
+                                  <UserButton />
+                                </SignedIn>
+                            </a>
                         </div>
                     </div>
                 </div>

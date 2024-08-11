@@ -1,10 +1,20 @@
 import type { AppProps } from 'next/app'
+
 import { config } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css';
 import '@mantine/carousel/styles.css';
 import Layout from '../components/Layout';
 import '@mantine/core/styles.css';
 import { createTheme, MantineProvider } from '@mantine/core';
+
+import {
+  ClerkProvider,
+  SignInButton,
+  SignedIn,
+  SignedOut,
+  UserButton
+} from '@clerk/nextjs'
+
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -42,8 +52,12 @@ export default function App({ Component, pageProps }: AppProps) {
         </Head>
         <MantineProvider theme={theme}>
         <Layout>
-            <Component {...pageProps} />
+            <ClerkProvider>
+
+                <Component {...pageProps} />
+            </ClerkProvider>
         </Layout>
         </MantineProvider>
+
     </>);
 }
