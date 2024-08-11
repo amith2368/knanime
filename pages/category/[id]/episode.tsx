@@ -378,6 +378,13 @@ const EpisodePage = () => {
             const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
 
             const { data } = await axios.get(url);
+
+            if (data.length === 0) {
+                const altUrl = `${API_URI}/meta/anilist/info/${encodeURIComponent(id)}?${params.toString()}`;
+                const { data } = await axios.get(altUrl);
+                const { episodes } = data;
+                return episodes as Episode[];
+            }
             return data as Episode[];
         }
 
@@ -402,8 +409,8 @@ const EpisodePage = () => {
                 ]
 
                 setHlsSource(`https://cors.zimjs.com/${defaultSource['url']}`);
-                setSubtitles(defaultSubtitle['url']);
-                setThumbnails(defaultThumbnail['url']);
+                if (defaultSubtitle) setSubtitles(defaultSubtitle['url']);
+                if (defaultThumbnail) setThumbnails(defaultThumbnail['url']);
                 setSkipTimes({
                     cues: skipCues
                 })
@@ -447,32 +454,6 @@ const EpisodePage = () => {
         // Store the updated allEpisodesWatched back to localStorage
         localStorage.setItem('all_episodes_watched', JSON.stringify(allEpisodesWatched));
     }
-
-
-  //   useEffect(() => {
-  //   const fetchSkipTimes = async () => {
-  //     try {
-  //       console.log(animeData?.malId)
-  //       const response = await axios.get('/api/aniskip', {
-  //         params: {
-  //           malId: animeData?.malId,
-  //           episodeNumber: ep,
-  //           episodeLength: 0,
-  //         },
-  //       });
-  //       const st: FetchSkipTimesResponse = response.data;
-  //       const filteredSkipTimes = st.results.filter(
-  //         ({ skipType }) => skipType === 'op' || skipType === 'ed',
-  //       );
-  //       setSkipTimes(filteredSkipTimes)
-  //
-  //     } catch (error) {
-  //       console.error('Error fetching skip times:', error);
-  //     }
-  //   };
-  //
-  //   fetchSkipTimes();
-  // }, [ep, animeData]);
 
 
     const getEpisodeByNumber = (episodes: Episode[], number: number) => {
