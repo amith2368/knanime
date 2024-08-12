@@ -341,6 +341,7 @@ const EpisodePage = () => {
                     console.log(local_allEpisodes);
                     setAnimeData(local_animeData);
                     setAllEpisodes(local_allEpisodes);
+                    console.log(local_allEpisodes);
                     const currentEpisode = local_allEpisodes.find((e: { number: number; }) => e.number === parseInt(ep as string));
                     if (currentEpisode) {
                         setEpisodeData(currentEpisode);
@@ -353,6 +354,7 @@ const EpisodePage = () => {
                         const fetchedAnimeData = response.data as AnimeDetails;
                         setAnimeData(fetchedAnimeData);
                         const episodes = await fetchEpisodes(fetchedAnimeData.id);
+                        console.log(episodes);
                         if (episodes) {
                             setAllEpisodes(episodes);
                             const currentEpisode = episodes.find(e => e.number === parseInt(ep as string));
@@ -375,17 +377,14 @@ const EpisodePage = () => {
         async function fetchEpisodes(id: string | undefined, dub: boolean = false, provider: string = 'zoro') {
             if (id === undefined) return;
             const params = new URLSearchParams({ provider, dub: dub ? 'true' : 'false' });
-            const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
+            // const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
+            // const { data } = await axios.get(url);
 
-            const { data } = await axios.get(url);
-
-            if (data.length === 0) {
-                const altUrl = `${API_URI}/meta/anilist/info/${encodeURIComponent(id)}?${params.toString()}`;
-                const { data } = await axios.get(altUrl);
-                const { episodes } = data;
-                return episodes as Episode[];
-            }
-            return data as Episode[];
+            console.log('got alt results');
+            const altUrl = `${API_URI}/meta/anilist/info/${encodeURIComponent(id)}?${params.toString()}`;
+            const { data } = await axios.get(altUrl);
+            const { episodes } = data;
+            return episodes as Episode[];
         }
 
         fetchVideoData();
