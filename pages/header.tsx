@@ -1,13 +1,6 @@
 import Link from 'next/link';
 import React, {useEffect, useRef, useState} from "react";
 import Router from 'next/router';
-import {
-  ClerkProvider,
-  SignInButton,
-  SignedIn,
-  SignedOut,
-  UserButton
-} from '@clerk/nextjs'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const KNHeader: React.FC = () => {
