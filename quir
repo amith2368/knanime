@@ -1,0 +1,125 @@
+[33mcommit 725ddf8466241e36c5fc1f987bda56c59b78c888[m[33m ([m[1;36mHEAD -> [m[1;32mmain[m[33m)[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Mon Aug 12 22:53:16 2024 +0530
+
+    Fixed a issue with next/previous episodes
+
+[33mcommit f07dea8248f681beb14cbcb6192310d8b088e16a[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sun Aug 11 13:00:42 2024 +0530
+
+    removed clerk
+
+[33mcommit 3aac1e6f8fcc8e6f1062f174283302d3b2818d80[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Aug 10 22:47:05 2024 +0530
+
+    Fixed sourcing issue, new player and linking issues in home
+
+[33mcommit be66d28f15601faaca19bf315f86b5b6d1379673[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Aug 10 21:05:02 2024 +0530
+
+    savepoint for player
+
+[33mcommit 0ff91a16d425adfb998091baa66cfbaf145756ef[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Jun 29 15:52:06 2024 +0400
+
+    LocalStorage for animeData info, faster episode fetch
+
+[33mcommit 5060ceb760c9ec5b3a2bea2c74110d026cfb7654[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Fri Jun 28 20:44:20 2024 +0400
+
+    Faster Load fix for episode, fix for undefiened episode in continue watchin
+
+[33mcommit 73687c3be63a1b1f5b71dfd32e51e26593af469c[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Fri Jun 21 17:59:09 2024 +0530
+
+    Fixed the Continue Watching boundary condn
+
+[33mcommit 98a705c97f27c5d64aa29182dab09985685b73ff[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Fri Jun 21 17:31:22 2024 +0530
+
+    Add sesky animations, localStorage support
+
+[33mcommit 500209f394ba97a5001ce110ae63872d6c0631c1[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Thu Jun 20 22:09:34 2024 +0530
+
+    Fixed responsiveness with Mantine Ui comps
+
+[33mcommit 37ab5dc0bd6384f1001787acba2386957a4cc275[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Jun 15 03:24:14 2024 +0530
+
+    New homepage, card components for carousel, better API used for anime data
+
+[33mcommit 8d6066fc306f124c14439efbf84506a265734aa4[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Fri Jun 14 14:21:32 2024 +0530
+
+    Smol patch: Fixed Description, API issues with large anime
+
+[33mcommit 132e8a1535cd7a75b67d22b623fc1a3cc2bab8df[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Fri Jun 14 01:56:38 2024 +0530
+
+    New features: Autoplay implemented, with Anilist Tracking (more info coming), New Styles using preline
+
+[33mcommit b0492380c65d86a30e6e2a8b2c5e70c6e07ced58[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Thu Jun 13 19:11:08 2024 +0530
+
+    New Start Hero Page, changed header, new autoskip partially implemented
+
+[33mcommit 03ccb0266741eed1659d10c4681524395a72f2ee[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Wed Jun 12 02:04:47 2024 +0530
+
+    Replaced lib location
+
+[33mcommit 88065993b50db61e09b13e367540a8c74ced7c85[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Wed Jun 12 01:56:59 2024 +0530
+
+    New PLAYER LESGGO, autonext implemented, wtf is an ad?, more smooth animations
+
+[33mcommit c0638f202465c8286c53f8d6da253901f6d0fdbc[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Wed Jun 12 01:56:42 2024 +0530
+
+    New PLAYER LESGGO, autonext implemented, wtf is an ad?, more smooth animations
+
+[33mcommit 280036ffe2662886f663316ab48721e6bd73c2e3[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sun Jun 9 00:50:34 2024 +0530
+
+    Changes in the loading bar, category instead of inf scroll in anime page
+
+[33mcommit 00746a632422727e76bcfb968788d0516caf5b08[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Jun 8 18:40:18 2024 +0530
+
+    Added speed Insights
+
+[33mcommit bd5b0af62409b007f677485a3925c71ea4e09537[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Jun 8 18:35:22 2024 +0530
+
+    New Tailwind CSS added with Build 1 changes for basic functionality
+
+[33mcommit 1255c7f2ceb43770e79a544012366d74cf56bc4b[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sat Jun 8 15:00:05 2024 +0530
+
+    First commit
+
+[33mcommit f60d9f7315b56d70bc33b2b3778aeadaeee747ac[m
+Author: amith2368 <amith2368@gmail.com>
+Date:   Sun May 5 11:57:01 2024 +0530
+
+    Initial commit from Create Next App
