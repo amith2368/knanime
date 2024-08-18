@@ -65,9 +65,9 @@ const KNHeader: React.FC = () => {
                                 {
                                     user ? (
                                       <div>
-                                        Welcome {user.name}! <a href="/api/auth/logout">Logout</a>
+                                        Welcome {user.name}! <Link href="/api/auth/logout">Logout</Link>
                                       </div>
-                                    ) : (<a href="/api/auth/login">Login</a>)
+                                    ) : (<Link href="/api/auth/login">Login</Link>)
                                 }
                             </div>
                         </div>
