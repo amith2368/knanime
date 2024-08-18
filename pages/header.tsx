@@ -1,12 +1,15 @@
 import Link from 'next/link';
 import React, {useEffect, useRef, useState} from "react";
 import Router from 'next/router';
+import { useUser } from '@auth0/nextjs-auth0/client';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const KNHeader: React.FC = () => {
     const [query, setQuery] = useState<string>('');
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const searchInputRef = useRef<HTMLInputElement>(null);
+
+    const { user, error, isLoading } = useUser();
 
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
@@ -58,9 +61,15 @@ const KNHeader: React.FC = () => {
                     </button>
                     <div className={`${isMenuOpen ? 'block' : 'hidden'} sm:block`}>
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end py-2 md:py-0 sm:ps-7">
-                            <a className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500" href="#">
-                                Under Development
-                            </a>
+                            <div className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500" href="#">
+                                {
+                                    user ? (
+                                      <div>
+                                        Welcome {user.name}! <a href="/api/auth/logout">Logout</a>
+                                      </div>
+                                    ) : (<a href="/api/auth/login">Login</a>)
+                                }
+                            </div>
                         </div>
                     </div>
                 </div>

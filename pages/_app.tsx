@@ -7,6 +7,7 @@ import Layout from '../components/Layout';
 import '@mantine/core/styles.css';
 import { createTheme, MantineProvider } from '@mantine/core';
 import { Analytics } from '@vercel/analytics/react';
+import { UserProvider } from '@auth0/nextjs-auth0/client';
 
 const theme = createTheme({
   /** Put your mantine theme override here */
@@ -45,7 +46,9 @@ export default function App({ Component, pageProps }: AppProps) {
       </Head>
       <MantineProvider theme={theme}>
           <Layout>
-          <Component {...pageProps} />
+            <UserProvider>
+                <Component {...pageProps} />
+            </UserProvider>
             <Analytics />
         </Layout>
         </MantineProvider>
