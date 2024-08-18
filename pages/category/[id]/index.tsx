@@ -232,9 +232,10 @@ const AnimePage: React.FC = () => {
                 <p className="text-md mb-2"><b>Released:</b> {details.releaseDate}</p>
                 <p className="text-md mb-2"><b>Genre:</b> {details.genres.map(genre => genre + ', ')}</p>
                 <p className="text-md mb-2"><b>Status:</b> {details.status}</p>
-                <p className="text-md mb-4"><b>Episodes:</b> {details.totalEpisodes}</p>
+                {details.type !== "MOVIE" && <p className="text-md mb-4"><b>Episodes:</b> {details.totalEpisodes}</p>}
+
                 <div className="mb-8">
-                    {episodeRanges(details.totalEpisodes).map((range, index) => (
+                {details.type !== 'MOVIE' && episodeRanges(details.totalEpisodes).map((range, index) => (
                         <button
                             key={index}
                             onClick={() => handleRangeClick(range)}
@@ -245,19 +246,28 @@ const AnimePage: React.FC = () => {
                     ))}
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                    {currentRange &&
+                    {details.type !== 'MOVIE' && currentRange &&
                         Array.from({ length: currentRange[1] - currentRange[0] + 1 }, (_, i) => i + currentRange[0]).map((episode) => (
                             <button
                                 key={episode}
                                 onClick={() =>  handleAnimeClick(`/category/${details?.id}/episode?id=${details?.id}&ep=${episode}`)}
                                 className={`bg-gray-700 hover:bg-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out ${watchedEpisodes.includes(episode.toString()) ? 'bg-gray-700' : 'bg-red-600'}`}
                             >
-                                Ep {episode}
+                                {details.type === 'MOVIE' ? 'Movie' : 'EP ' + episode}
                             </button>
                         ))}
+                    {details.type === 'MOVIE' &&
+                        <button
+                            key={1}
+                            onClick={() => handleAnimeClick(`/category/${details?.id}/episode?id=${details?.id}&ep=1`)}
+                            className={`bg-gray-700 hover:bg-gray-800 font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out ${watchedEpisodes.includes('1') ? 'bg-gray-700' : 'bg-red-600'}`}
+                        >
+                            Movie
+                        </button>
+                    }
                 </div>
             </div>
-            <div className="lg:w-1/3 w-full mt-8 lg:mt-0">
+                <div className="lg:w-1/3 w-full mt-8 lg:mt-0">
                     <div className="relative">
                         <img
                             src={details.image}

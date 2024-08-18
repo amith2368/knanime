@@ -55,7 +55,7 @@ const MainCarousel:React.FC<CardCarouselProps> = ({items}) => {
               onMouseLeave={autoplay.current.reset}
               height={400}>
         { items.map((item, index) => (
-            <Carousel.Slide key={index} className={styles.slide} style={{background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${item.cover})`}}>
+            <Carousel.Slide key={index} className={styles.slide} style={{background: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${item.cover})  no-repeat center/cover`}}>
                 {/*<img src={item.cover} alt="cover" className={styles.image} />*/}
                 <div className={styles.content}>
                     <h2 className={styles.title}>{item.title.english}</h2>

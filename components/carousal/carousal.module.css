@@ -1,8 +1,10 @@
 .slide {
   border-radius: 16px;
   overflow: hidden;
-  background-size: cover;
+  background-repeat: no-repeat;
+  background-size: auto;
   background-position: center;
+  /*no repeat for background image cover*/
   height: 400px; /* Adjust the height as needed */
   display: flex;
   align-items: center;
