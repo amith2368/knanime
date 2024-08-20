@@ -235,7 +235,7 @@ const AnimePage: React.FC = () => {
                 {details.type !== "MOVIE" && <p className="text-md mb-4"><b>Episodes:</b> {details.totalEpisodes}</p>}
 
                 <div className="mb-8">
-                {details.type !== 'MOVIE' && episodeRanges(details.totalEpisodes).map((range, index) => (
+                {details.type !== 'MOVIE' && episodeRanges(details.currentEpisode).map((range, index) => (
                         <button
                             key={index}
                             onClick={() => handleRangeClick(range)}
