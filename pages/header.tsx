@@ -137,7 +137,6 @@ const KNHeader: React.FC = () => {
                         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end py-2 md:py-0 sm:ps-7">
                             <div
                                 className="font-medium text-gray-600 hover:text-gray-400 dark:text-neutral-400 dark:hover:text-neutral-500">
-                                Under Development
                             </div>
                         </div>
                     </div>

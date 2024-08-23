@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {Suspense, useEffect, useState} from 'react';
 import Router from 'next/router';
 import "../app/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -10,6 +10,7 @@ import MainCarousel from "@/components/carousal/main-carousal";
 import CardCarousel from "@/components/carousal/card-carousal";
 import axios from "axios";
 import WatchCarousel from "@/components/carousal/watching-carousal";
+import {Skeleton} from "@mantine/core";
 
 
 
@@ -108,10 +109,8 @@ const Home: React.FC = () => {
                     </div>
                 }
                 {
-                    topAnime &&
-                    <div className="mt-10">
-                        <CardCarousel items={topAnime} title="Top Anime"/>
-                    </div>
+                    topAnime && <CardCarousel items={topAnime} title="Top Anime"/>
+
                 }
                 {
                     trendingAnime && <CardCarousel items={trendingAnime} title="Trending Anime"/>
