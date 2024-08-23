@@ -1,4 +1,4 @@
-import React, {Suspense, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import Router from 'next/router';
 import "../app/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next"
@@ -10,7 +10,6 @@ import MainCarousel from "@/components/carousal/main-carousal";
 import CardCarousel from "@/components/carousal/card-carousal";
 import axios from "axios";
 import WatchCarousel from "@/components/carousal/watching-carousal";
-import {Skeleton} from "@mantine/core";
 
 
 
@@ -93,27 +92,26 @@ const Home: React.FC = () => {
 
 
     return (
-
-        <div
-            className={`animate-in fade-in min-h-screen bg-black text-white ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
+        <div className={`animate-in fade-in min-h-screen bg-black text-white ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
             <SpeedInsights/>
             <KNHeader />
 
-
-            <div className={`container w-11/12 mx-auto`}>
+            <div className = {`container w-11/12 mx-auto`}>
                 {trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}
                 {
-                    recentAnime && recentAnime.length > 0 &&
-                    <div className="mt-10">
-                        <WatchCarousel items={recentAnime} title="Continue Watching"/>
-                    </div>
+                    // recentAnime && recentAnime.length > 0 &&
+                    // <div className="mt-10">
+                    //     <WatchCarousel items={recentAnime} title="Continue Watching"/>
+                    // </div>
+                    recentAnime.length > 0 ? <WatchCarousel items={recentAnime} title="Recent Anime"/> : <div className = "alert alert-info my-5"> No anime watched recently!! </div>
                 }
                 {
-                    topAnime && <CardCarousel items={topAnime} title="Top Anime"/>
-
+                    // topAnime &&  <div className="mt-10"> <CardCarousel items={topAnime} title="Top Anime"/> </div>
+                    <CardCarousel items={topAnime} title="Top Anime"/>
                 }
                 {
-                    trendingAnime && <CardCarousel items={trendingAnime} title="Trending Anime"/>
+                    // trendingAnime && <CardCarousel items={trendingAnime} title="Trending Anime"/>
+                    <CardCarousel items={trendingAnime} title="Trending Anime"/>
                 }
             </div>
 
