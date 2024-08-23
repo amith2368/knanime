@@ -5,7 +5,8 @@ import classes from './card-carousal.module.css';
 import {useRouter} from "next/router";
 import {FontAwesomeIcon} from "@fortawesome/react-fontawesome";
 import {faPlay} from "@fortawesome/free-solid-svg-icons";
-import React from "react";
+import React, {useState, useEffect} from "react";
+import { C } from '@vidstack/react/types/vidstack.js';
 
 interface CarouselItem  {
     id: string;
@@ -73,31 +74,38 @@ function Card({ id, image, title, type }: CarouselItem) {
   );
 }
 
-
 const CardCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
   const theme = useMantineTheme();
   const mobile = useMediaQuery(`(max-width: ${theme.breakpoints.sm})`);
-  const slides = items.map((item) => (
+  const count = Array(10).fill(0);
+
+  const slides = items.map((item) => (        
     <Carousel.Slide key={item.id}>
       <Card {...item} />
     </Carousel.Slide>
   ));
+  
+  const slideSkeleton = count.map((_, index) =>(
+    <Carousel.Slide key={index}>
+      <div className = "skeleton h-64 w-60 rounded" /> 
+    </Carousel.Slide>
+  ))
 
   return (
     <>
         <Title order={1} className="mt-10 mb-5">
             {title}
         </Title>
+
         <Carousel
           slideSize={{ base: '100%', sm: '30%', md: '20%' }}
           slideGap={{ base: rem(3), sm: 'xl' }}
           align="start"
           slidesToScroll={mobile ? 1 : 2}
         >
-          {slides}
+            {items.length > 0 ? slides : slideSkeleton}
         </Carousel>
     </>
-
   );
 }
 
