@@ -64,7 +64,7 @@ const WatchCarousel: React.FC<CardCarouselProps> = ({ items, title}) => {
 
   return (
     <>
-        <Title order={1} className="mt-10 mb-5">
+        <Title order={1} className="relative mt-10 mb-5 z-100">
             {title}
         </Title>
         <Carousel

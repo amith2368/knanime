@@ -10,6 +10,7 @@ import MainCarousel from "@/components/carousal/main-carousal";
 import CardCarousel from "@/components/carousal/card-carousal";
 import axios from "axios";
 import WatchCarousel from "@/components/carousal/watching-carousal";
+import HeroSection from "@/components/carousal/hero-section";
 
 
 
@@ -94,10 +95,12 @@ const Home: React.FC = () => {
     return (
         <div className={`animate-in fade-in min-h-screen bg-black text-white ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
             <SpeedInsights/>
-            <KNHeader />
 
-            <div className = {`container w-11/12 mx-auto`}>
-                {trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}
+            <KNHeader />
+            <HeroSection />
+            <div className = {`container w-11/12 mx-auto -mt-[200px]`}>
+
+                {/*{trendingAnime && <MainCarousel items={trendingAnime.slice(0, 5)}/>}*/}
                 {
                     // recentAnime && recentAnime.length > 0 &&
                     // <div className="mt-10">
