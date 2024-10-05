@@ -4,7 +4,10 @@ import "../app/globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faSearch} from '@fortawesome/free-solid-svg-icons';
+import classes from "@/pages/header.module.css";
+import {Autocomplete} from "@mantine/core";
+
 
 const Index: React.FC = () => {
     const [query, setQuery] = useState<string>('');
@@ -25,7 +28,7 @@ const Index: React.FC = () => {
     return (
 
         <div
-            className={`animate-in fade-in min-h-screen bg-black text-white pl-8 p ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
+            className={`animate-in fade-in min-h-screen bg-black text-white p ${isTransitioning ? 'opacity-0 transition-opacity duration-500' : 'opacity-100'}`}>
             <SpeedInsights/>
 
             <div className="relative overflow-hidden">
@@ -49,7 +52,6 @@ const Index: React.FC = () => {
                               <div
                                   className="relative z-10 flex space-x-3 p-3 bg-white border rounded-lg shadow-lg shadow-gray-100 dark:bg-neutral-900 dark:border-neutral-700 dark:shadow-gray-900/20">
                                   <div className="flex-[1_0_0%] ">
-
                                       <input
                                           type="text"
                                           value={query}

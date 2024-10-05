@@ -1,35 +1,26 @@
-import "../../../app/globals.css";
-import "./player.css"
-// import '@vidstack/react/player/styles/base.css';
-// import '@vidstack/react/player/styles/plyr/theme.css';
-
-import '@vidstack/react/player/styles/default/theme.css';
-import '@vidstack/react/player/styles/default/layouts/video.css';
+import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/router'
+import Image from 'next/image'
+import Link from 'next/link'
+import axios from 'axios'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
 import {
     isHLSProvider,
-    MediaPlayer,
-    MediaPlayerInstance,
+    MediaPlayer, MediaPlayerInstance,
     MediaProvider,
     MediaProviderAdapter,
     MediaProviderChangeEvent,
-    Track,
-    type VTTContent
-} from '@vidstack/react';
+    Track, VTTContent
+} from '@vidstack/react'
+import { DefaultVideoLayout, defaultLayoutIcons } from '@vidstack/react/player/layouts/default'
+import KNHeader from "@/pages/header"
+import KNFooter from "@/pages/footer"
 
-// import {PlyrLayout, plyrLayoutIcons} from '@vidstack/react/player/layouts/plyr';
-import { defaultLayoutIcons, DefaultVideoLayout } from '@vidstack/react/player/layouts/default';
-
-import {FontAwesomeIcon} from '@fortawesome/react-fontawesome';
-import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
-import {useRouter} from 'next/router';
-import React, {useEffect, useRef, useState} from 'react';
-import axios, {all} from 'axios';
-import KNHeader from "@/pages/header";
-import KNFooter from "@/pages/footer";
-import Episode from "@/pages/api/episode";
-import { redirect } from "next/navigation";
-import Link from "next/link";
-
+import '@vidstack/react/player/styles/default/theme.css'
+import '@vidstack/react/player/styles/default/layouts/video.css'
+import "../../../app/globals.css";
+import {Button, ListItem} from "@mantine/core";
 
 interface AnimeDetails {
   id: string;
@@ -197,7 +188,8 @@ const EpisodePage = () => {
     const API_URI = 'https://knanime-api.vercel.app'
     const router = useRouter();
     const player = useRef<MediaPlayerInstance>(null);
-    let { id, ep } = router.query;
+    let { id } = router.query;
+    const [ep, setEp] = useState<number>(0);
     const [animeData, setAnimeData] = useState<AnimeDetails | null>(null);
     const [allEpisodes, setAllEpisodes] = useState<Episode[]>([]);
     const [episodeData, setEpisodeData] = useState<Episode | null>(null)
@@ -215,7 +207,8 @@ const EpisodePage = () => {
         ],
     });
     const [currentTime, setCurrentTime] = useState<number>(0);
-
+    const [currentEpisodeRange, setCurrentEpisodeRange] = useState<number>(0)
+    const [selectedSource, setSelectedSource] = useState<'sub' | 'dub'>('sub')
 
 
     const toggleAutoSkip = () => {
@@ -326,57 +319,51 @@ const EpisodePage = () => {
         }
     }
 
-    // Get the Anime Data
-    useEffect(() => {
-        const fetchVideoData = async () => {
-            if (!id || !ep) return;
+    const fetchVideoData = async () => {
+        if (!id || !ep) return
 
-            try {
-                // Check if animeData and episode data in localStorage
-                const local_allEpisodes = JSON.parse(localStorage.getItem('current_episodes_data') || '{}');
-                const local_animeData = JSON.parse(localStorage.getItem('current_anime_data') || '{}');
-                // Check if the animeData has the same id
-                if (local_animeData && local_animeData.id === id) {
-                    console.log("Got prev data");
-                    console.log(local_allEpisodes);
-                    setAnimeData(local_animeData);
-                    setAllEpisodes(local_allEpisodes);
-                    console.log(local_allEpisodes);
-                    const currentEpisode = local_allEpisodes.find((e: { number: number; }) => e.number === parseInt(ep as string));
-                    if (currentEpisode) {
-                        setEpisodeData(currentEpisode);
-                        await fetchStreamData(currentEpisode.id);
-                    }
-                } else {
-                    console.log("Running new fetch");
-                    const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`);
-                    if (response.data) {
-                        const fetchedAnimeData = response.data as AnimeDetails;
-                        setAnimeData(fetchedAnimeData);
-                        const episodes = await fetchEpisodes(fetchedAnimeData.id);
-                        console.log(episodes);
-                        if (episodes) {
-                            setAllEpisodes(episodes);
-                            const currentEpisode = episodes.find(e => e.number === parseInt(ep as string));
-                            if (currentEpisode) {
-                                setEpisodeData(currentEpisode);
-                                await fetchStreamData(currentEpisode.id);
-                                localStorage.setItem('current_anime_data', JSON.stringify(fetchedAnimeData));
-                                localStorage.setItem('current_episodes_data', JSON.stringify(episodes));
-                            }
-                        }
-                    }
-                }
-            } catch (err) {
-                console.error('Failed to fetch video:', err);
-                setError('Failed to load video data');
-                setIsLoading(false);
+        try {
+          setIsLoading(true)
+          const local_allEpisodes = JSON.parse(localStorage.getItem('current_episodes_data') || '{}')
+          const local_animeData = JSON.parse(localStorage.getItem('current_anime_data') || '{}')
+          console.log("Episode watching", ep)
+          if (local_animeData && local_animeData.id === id) {
+            setAnimeData(local_animeData)
+            setAllEpisodes(local_allEpisodes)
+            const currentEpisode = local_allEpisodes.find((e: { number: number }) => e.number === ep)
+            if (currentEpisode) {
+              setEpisodeData(currentEpisode)
+              await fetchStreamData(currentEpisode.id)
             }
-        };
+          } else {
+            const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`)
+            if (response.data) {
+              const fetchedAnimeData = response.data as AnimeDetails
+              setAnimeData(fetchedAnimeData)
+              const episodes = await fetchEpisodes(fetchedAnimeData.id)
+              if (episodes) {
+                setAllEpisodes(episodes)
+                const currentEpisode = episodes.find(e => e.number === ep)
+                if (currentEpisode) {
+                  setEpisodeData(currentEpisode)
+                  await fetchStreamData(currentEpisode.id)
+                  localStorage.setItem('current_anime_data', JSON.stringify(fetchedAnimeData))
+                  localStorage.setItem('current_episodes_data', JSON.stringify(episodes))
+                }
+              }
+            }
+          }
+          setIsLoading(false)
+        } catch (err) {
+          console.error('Failed to fetch video:', err)
+          setError('Failed to load video data')
+          setIsLoading(false)
+        }
+    }
 
-        async function fetchEpisodes(id: string | undefined, dub: boolean = false, provider: string = 'zoro') {
+    async function fetchEpisodes(id: string | undefined, provider: string = 'zoro') {
             if (id === undefined) return;
-            const params = new URLSearchParams({ provider, dub: dub ? 'true' : 'false' });
+            const params = new URLSearchParams({ provider, dub: selectedSource === 'dub' ? 'true' : 'false' });
             // const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
             // const { data } = await axios.get(url);
 
@@ -385,10 +372,22 @@ const EpisodePage = () => {
             const { data } = await axios.get(altUrl);
             const { episodes } = data;
             return episodes as Episode[];
-        }
+    }
 
-        fetchVideoData();
-    }, [id, ep]);
+    // Get the Anime Data
+    useEffect(() => {
+        if (router.isReady) {
+            const initialEp = parseInt(router.query.ep as string) || 1
+            console.log("Initial ep: ", initialEp)
+            setEp(initialEp)
+        }
+    }, [router.isReady, router.query.ep])
+
+    useEffect(() => {
+        if(ep > 0) {
+            fetchVideoData();
+        }
+    }, [id, ep])
 
 
     async function fetchStreamData (id: string) {
@@ -407,7 +406,7 @@ const EpisodePage = () => {
                     { startTime: outro.start, endTime: outro.end, text: 'Outro' },
                 ]
 
-                setHlsSource(`https://cors.zimjs.com/${defaultSource['url']}`);
+                setHlsSource(`/api/proxy/${defaultSource['url']}`);
                 if (defaultSubtitle) setSubtitles(defaultSubtitle['url']);
                 if (defaultThumbnail) setThumbnails(defaultThumbnail['url']);
                 setSkipTimes({
@@ -460,17 +459,29 @@ const EpisodePage = () => {
     };
 
     const handleNextEpisode = () => {
-        if (animeData && animeData.totalEpisodes > (parseInt(ep as string) + 1)) {
-            router.push(`/category/${id}/episode?id=${id}&ep=${parseInt(ep as string) + 1}`, undefined, {shallow: true});
+        if (animeData && ep < animeData.totalEpisodes) {
+          setEp(prevEp => prevEp + 1);
+          const currentUrl = new URL(window.location.href);
+          currentUrl.searchParams.set('ep', String(ep + 1));
+          window.history.pushState({}, '', currentUrl);
         }
-    };
-
+    }
 
     const handlePreviousEpisode = () => {
-        if (animeData && (parseInt(ep as string) - 1) >= 1) {
-            router.push(`/category/${id}/episode?id=${id}&ep=${parseInt(ep as string) - 1}`);
+        if (ep > 1) {
+            setEp(prevEp => prevEp - 1);
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('ep', String(ep - 1));
+            window.history.pushState({}, '', currentUrl);
         }
-    };
+    }
+
+    const handleSelectEpisode = (selectedEp: number) => {
+        setEp(selectedEp);
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('ep', String(selectedEp));
+        window.history.pushState({}, '', currentUrl);
+    }
 
     const handleEpisodeEnded = () => {
         if (autoNext) {
@@ -482,123 +493,271 @@ const EpisodePage = () => {
         router.push(`/category/${id}`);
     };
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-black text-white">
-                <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-red-600" role="status">
-                    <span className="visually-hidden">...</span>
-                </div>
-            </div>
-        );
+    const handleSourceChange = (source: 'sub' | 'dub') => {
+        setSelectedSource(source)
     }
 
-    if (error) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-black text-white">
-                <p>Error: {error}</p>
-            </div>
-        );
+    const getEpisodeRanges = () => {
+        if (!animeData) return []
+        const totalEpisodes = animeData.totalEpisodes
+        const ranges = []
+        for (let i = 0; i < totalEpisodes; i += 30) {
+          ranges.push(`${i + 1}-${Math.min(i + 30, totalEpisodes)}`)
+        }
+        return ranges
     }
+
+    const formatDescription = (description: string) => {
+        return description
+            // Line breaks
+            .replace(/<br\s*\/?>/g, '\n')
+            // Bold tags (<b> or <strong>)
+            .replace(/<\/?b>/g, '**')
+            .replace(/<\/?strong>/g, '**')
+            // Italic tags (<i> or <em>)
+            .replace(/<\/?i>/g, '_')
+            .replace(/<\/?em>/g, '_')
+            // Underline tags (<u>)
+            .replace(/<\/?u>/g, '__')
+            // Strikethrough tags (<s> or <del>)
+            .replace(/<\/?s>/g, '~~')
+            .replace(/<\/?del>/g, '~~')
+            // Remove any other HTML tags (this is optional and can be omitted if needed)
+            .replace(/<\/?[^>]+(>|$)/g, '');
+    };
+
+    // if (isLoading) {
+    //     return (
+    //         <div className="flex items-center justify-center min-h-screen bg-black text-white">
+    //             <div className="spinner-border animate-spin inline-block w-16 h-16 border-4 rounded-full text-red-600" role="status">
+    //                 <span className="visually-hidden">...</span>
+    //             </div>
+    //         </div>
+    //     );
+    // }
+
+   if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+        <p className="text-xl mb-4">Error: {error}</p>
+        <button
+          onClick={handleBackToAnimePage}
+          className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+        >
+          Go Back to Anime Info
+        </button>
+      </div>
+    )
+  }
 
     // @ts-ignore
     return (
-        <div>
-            <KNHeader />
-            {animeData &&
-                <div className="min-h-screen bg-black text-white pl-4 pr-4">
-                    <div className="max-w-4xl mx-auto">
-                        <button
-                            onClick={handleBackToAnimePage}
-                            className="mb-5 top-4 left-4 bg-black hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center space-x-2"
-                        >
-                            <FontAwesomeIcon icon={faArrowLeft}/>
-                            <span>Back to Anime Page</span>
-                        </button>
-                        <h1 className="text-3xl font-bold mb-4">{animeData?.title.english} <span
-                            className="text-2xl font-semibold mb-4">Episode {ep}</span></h1>
+        <div className="min-h-screen bg-black text-white">
+            <KNHeader/>
+            <main className="container mx-auto px-4 py-8">
+                <button
+                    onClick={() => router.push(`/category/${id}`)}
+                    className="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center space-x-2"
+                >
+                    <FontAwesomeIcon icon={faArrowLeft}/>
+                    <span>Back to Anime Page</span>
+                </button>
 
-                        <div className="relative mb-8">
-                            <div>
-                                <MediaPlayer
-                                    className='player'
-                                    title={animeData?.title.english}
-                                    src={hlsSource}
-                                    autoPlay={autoPlay}
-                                    ref={player}
+                {animeData && (
+                    <>
+                        <h1 className="text-3xl font-bold mb-4">
+                            {animeData.title.english} <span className="text-2xl font-semibold">Episode {ep}</span>
+                        </h1>
 
-                                    onTimeUpdate={onTimeUpdate}
-                                    onProviderChange={onProviderChange}
-                                    aspectRatio='16/9'
-                                    load='eager'
-                                    posterLoad='eager'
-                                    streamType='on-demand'
-                                    storage='storage-key'
-                                    keyTarget='player'
-                                    onEnded={handleEpisodeEnded}
-                                >
-                                    <MediaProvider/>
-                                    {/*<PlyrLayout*/}
-                                    {/*    icons={plyrLayoutIcons}*/}
-                                    {/*    thumbnails={thumbnails}*/}
-                                    {/*/>*/}
-                                    <DefaultVideoLayout thumbnails={thumbnails} icons={defaultLayoutIcons} />
-                                    <Track src={subtitles} kind="subtitles" label="English" lang="en-US" default />
-                                    <Track content={skipTimes} kind="chapters" label="English" lang="en-US" default />
-                                </MediaPlayer>
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2">
+                                <div className="relative mb-8">
+                                    <MediaPlayer
+                                        className="player"
+                                        title={animeData.title.english}
+                                        src={hlsSource}
+                                        autoPlay={autoPlay}
+                                        ref={player}
+                                        onTimeUpdate={onTimeUpdate}
+                                        onProviderChange={onProviderChange}
+                                        aspectRatio="16/9"
+                                        onEnded={handleEpisodeEnded}
+                                    >
+                                        <MediaProvider/>
+                                        <DefaultVideoLayout thumbnails={thumbnails} icons={defaultLayoutIcons}/>
+                                        <Track src={subtitles} kind="subtitles" label="English" lang="en-US" default/>
+                                        <Track content={skipTimes} kind="chapters" label="English" lang="en-US"
+                                               default/>
+                                    </MediaPlayer>
+                                </div>
+
+                                <div className="flex justify-between mb-8">
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-lg font-semibold">AutoNext:</span>
+                                        <div className="btn-group">
+                                            <button
+                                                className={`btn ${autoNext ? 'btn-active' : ''}`}
+                                                onClick={() => setAutoNext(true)}
+                                            >
+                                                On
+                                            </button>
+                                            <button
+                                                className={`btn ${!autoNext ? 'btn-active' : ''}`}
+                                                onClick={() => setAutoNext(false)}
+                                            >
+                                                Off
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center space-x-4">
+                                        <span className="text-lg font-semibold">AutoSkip:</span>
+                                        <div className="btn-group">
+                                            <button
+                                                className={`btn ${autoSkip ? 'btn-active' : ''}`}
+                                                onClick={() => setAutoSkip(true)}
+                                            >
+                                                On
+                                            </button>
+                                            <button
+                                                className={`btn ${!autoSkip ? 'btn-active' : ''}`}
+                                                onClick={() => setAutoSkip(false)}
+                                            >
+                                                Off
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="flex justify-between mb-8">
+                                    {ep > 1 && (
+                                        <button
+                                            onClick={handlePreviousEpisode}
+                                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                                        >
+                                            <FontAwesomeIcon icon={faArrowLeft}/> Previous Episode
+                                        </button>
+                                    )}
+                                    {ep < animeData.totalEpisodes && (
+                                        <button
+                                            onClick={handleNextEpisode}
+                                            className="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
+                                        >
+                                            Next Episode <FontAwesomeIcon icon={faArrowRight}/>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/*<div className="bg-gray-800 rounded-lg p-6 mb-8">*/}
+                                {/*    <h2 className="text-2xl font-bold mb-4">Source Selection</h2>*/}
+                                {/*    <div className="flex space-x-4">*/}
+                                {/*        <button*/}
+                                {/*            className={`btn ${selectedSource === 'sub' ? 'btn-primary' : 'btn-outline'}`}*/}
+                                {/*            onClick={() => handleSourceChange('sub')}*/}
+                                {/*        >*/}
+                                {/*            Sub*/}
+                                {/*        </button>*/}
+                                {/*        <button*/}
+                                {/*            className={`btn ${selectedSource === 'dub' ? 'btn-primary' : 'btn-outline'}`}*/}
+                                {/*            onClick={() => handleSourceChange('dub')}*/}
+                                {/*        >*/}
+                                {/*            Dub*/}
+                                {/*        </button>*/}
+                                {/*    </div>*/}
+                                {/*</div>*/}
+
+                                <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                                    <h2 className="text-2xl font-bold mb-4">Episode List</h2>
+                                    {animeData.totalEpisodes > 30 && (
+                                        <div className="mb-4">
+                                            <select
+                                                className="select select-bordered w-full max-w-xs"
+                                                value={currentEpisodeRange}
+                                                onChange={(e) => setCurrentEpisodeRange(parseInt(e.target.value))}
+                                            >
+                                                {getEpisodeRanges().map((range, index) => (
+                                                    <option key={index} value={index * 30}>
+                                                        Episodes {range}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                    )}
+                                    <div className="space-y-4 h-[70vh] overflow-y-auto pr-4">
+                                        {allEpisodes.slice(currentEpisodeRange, currentEpisodeRange + 30).map((episode) => (
+                                            <div
+                                                key={episode.id}
+                                                onClick={() => handleSelectEpisode(episode.number)}
+                                                className={`block p-4 rounded hover:cursor-pointer ${
+                                                    episode.number === ep
+                                                        ? 'bg-red-600 text-white'
+                                                        : 'bg-gray-700 hover:bg-gray-600'
+                                                }`}
+                                            >
+                                                <div className="flex items-center space-x-4">
+                                                    <Image
+                                                        src={episode.image}
+                                                        alt={`Episode ${episode.number}`}
+                                                        width={100}
+                                                        height={56}
+                                                        className="rounded"
+                                                    />
+                                                    <div>
+                                                        <h3 className="font-semibold">Episode {episode.number}: {episode.title}</h3>
+                                                        <p className="text-sm text-gray-300 line-clamp-2">{episode.description}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="lg:col-span-1">
+                                <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                                    <h2 className="text-2xl font-bold mb-4">Anime Info</h2>
+                                    <Image
+                                        src={animeData.image}
+                                        alt={animeData.title.english}
+                                        width={300}
+                                        height={450}
+                                        className="rounded-lg mb-4"
+                                    />
+                                    <p className="mb-2"><strong>Status:</strong> {animeData.status}</p>
+                                    <p className="mb-2"><strong>Episodes:</strong> {animeData.totalEpisodes}</p>
+                                    <p className="mb-2"><strong>Genre:</strong> {animeData.genres.join(', ')}</p>
+                                    <div className="text-sm text-gray-300 whitespace-pre-wrap">
+                                        {formatDescription(animeData.description).split('**').map((text, index) =>
+                                            index % 2 === 0 ? text : <strong key={index}>{text}</strong>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                                    <h2 className="text-2xl font-bold mb-4">Recommended Anime</h2>
+                                    <div className="space-y-4">
+                                    {animeData.recommendations.slice(0, 5).map((rec) => (
+                                            <Link key={rec.id} href={`/category/${rec.id}`}
+                                                  className="flex items-center space-x-4 hover:bg-gray-700 p-2 rounded">
+                                                <Image
+                                                    src={rec.image}
+                                                    alt={rec.title.english}
+                                                    width={50}
+                                                    height={75}
+                                                    className="rounded"
+                                                />
+                                                <div>
+                                                    <p className="font-semibold">{rec.title.english}</p>
+                                                    <p className="text-sm text-gray-400">{rec.type}</p>
+                                                </div>
+                                            </Link>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
                         </div>
-
-                        {/*PLAYBACK OPTIONS */}
-                        <div className="grid sm:grid-cols-2 gap-2">
-                            <label htmlFor="hs-checkbox-in-form"
-                                   className="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm focus:border-red-600 focus:ring-red-600 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
-                                <input type="checkbox"
-                                       className="shrink-0 mt-0.5 border-gray-200 rounded text-red-600 focus:ring-red-600 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-red-600 dark:checked:border-red-600 dark:focus:ring-offset-gray-800"
-                                       id="hs-checkbox-in-form"
-                                       checked={autoNext}
-                                       onChange={toggleAutoNext}
-                                />
-                                <span className="text-sm text-gray-500 ms-3 dark:text-neutral-400">AutoNext</span>
-                            </label>
-
-                            <label htmlFor="hs-checkbox-checked-in-form"
-                                   className="flex p-3 w-full bg-white border border-gray-200 rounded-lg text-sm focus:border-red-600 focus:ring-red-600 dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-400">
-                                <input type="checkbox"
-                                       className="shrink-0 mt-0.5 border-gray-200 rounded text-red-600 focus:ring-red-600 disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-800 dark:border-neutral-700 dark:checked:bg-red-600 dark:checked:border-red-600 dark:focus:ring-offset-gray-800"
-                                       checked={autoSkip}
-                                       onChange={toggleAutoSkip}
-                                       id="hs-checkbox-checked-in-form"/>
-                                <span className="text-sm text-gray-500 ms-3 dark:text-neutral-400">AutoSkip</span>
-                            </label>
-                        </div>
-
-                        {/*NEXT/PREV Options*/}
-
-                        <div className="flex justify-between m-8">
-                            {(parseInt(ep as string) - 1) >= 1 && (
-                                <button
-                                     onClick={handlePreviousEpisode}
-                                    className="bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm"
-                                >
-                                    <FontAwesomeIcon icon={faArrowLeft}/>
-                                    &nbsp;Previous Episode
-                                </button>
-                            )}
-                            {animeData.totalEpisodes >= (parseInt(ep as string) + 1)  && (
-                                <div>
-                                  <button onClick={handleNextEpisode}
-                                    className={`bg-black outline outline-offset-2 hover:outline-red-500 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out  sm:py-1 sm:px-2 sm:text-sm ${!(animeData.totalEpisodes > (parseInt(ep as string) + 1)) ? 'ml-auto' : ''}`}
-                                  >
-                                    Next Episode&nbsp;
-                                    <FontAwesomeIcon icon={faArrowRight}/>
-                                  </button>
-                                </div>
-                            )}
-                        </div>
-
-                    </div>
-                </div>
-            }
+                    </>
+                )}
+            </main>
             <KNFooter/>
         </div>
 

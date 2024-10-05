@@ -32,11 +32,13 @@
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
+    "dompurify": "^3.1.7",
     "embla-carousel-autoplay": "^7.1.0",
     "embla-carousel-react": "^7.1.0",
-    "framer-motion": "^11.2.11",
+    "framer-motion": "^11.11.1",
     "hls.js": "^1.5.11",
     "html-react-parser": "^5.1.10",
+    "isomorphic-dompurify": "^2.16.0",
     "media-icons": "^1.1.4",
     "netlify-identity-widget": "^1.9.2",
     "next": "14.2.3",
@@ -53,6 +55,7 @@
     "react-swipeable": "^7.0.1",
     "recharts": "^2.12.7",
     "slick-carousel": "^1.8.1",
+    "swiper": "^11.1.14",
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
