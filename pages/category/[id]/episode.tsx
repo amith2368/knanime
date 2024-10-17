@@ -331,24 +331,16 @@ const EpisodePage = () => {
 
         try {
           setIsLoading(true)
-          const local_allEpisodes = JSON.parse(localStorage.getItem('current_episodes_data') || '{}')
-          const local_animeData = JSON.parse(localStorage.getItem('current_anime_data') || '{}')
-          console.log("Episode watching", ep)
-          if (local_animeData && local_animeData.id === id) {
-            setAnimeData(local_animeData)
-            setAllEpisodes(local_allEpisodes)
-            const currentEpisode = local_allEpisodes.find((e: { number: number }) => e.number === ep)
-            if (currentEpisode) {
-              setEpisodeData(currentEpisode)
-              await fetchStreamData(currentEpisode.id)
-            }
-          } else {
-            const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`)
-            if (response.data) {
+          // const local_allEpisodes = JSON.parse(localStorage.getItem('current_episodes_data') || '{}')
+          // const local_animeData = JSON.parse(localStorage.getItem('current_anime_data') || '{}')
+          console.log("Episode watching", ep);
+          const response = await axios.get(`/api/anime?id=${encodeURIComponent(id as string)}`)
+          if (response.data) {
               const fetchedAnimeData = response.data as AnimeDetails
               setAnimeData(fetchedAnimeData)
               const episodes = await fetchEpisodes(fetchedAnimeData.id)
               if (episodes) {
+                console.log(episodes)
                 setAllEpisodes(episodes)
                 const currentEpisode = episodes.find(e => e.number === ep)
                 if (currentEpisode) {
@@ -359,7 +351,6 @@ const EpisodePage = () => {
                 }
               }
             }
-          }
           setIsLoading(false)
         } catch (err) {
           console.error('Failed to fetch video:', err)
@@ -370,13 +361,17 @@ const EpisodePage = () => {
 
     async function fetchEpisodes(id: string | undefined) {
             if (id === undefined) return;
-            const params = new URLSearchParams({ provider: selectedSource.domain, dub: selectedSource.dub ? 'true' : 'false' });
+            try {
+                const params = new URLSearchParams({ provider: selectedSource.domain, dub: selectedSource.dub ? 'true' : 'false' });
+                const altUrl = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
+                const { data } = await axios.get(altUrl);
+                const episodes = data;
+                return episodes as Episode[];
+            } catch (err) {
+                console.log("Fetching Episode Error", err);
+                return [];
+            }
 
-            console.log('got episode data');
-            const altUrl = `${API_URI}/meta/anilist/info/${encodeURIComponent(id)}?${params.toString()}`;
-            const { data } = await axios.get(altUrl);
-            const { episodes } = data;
-            return episodes as Episode[];
     }
 
     // Get the Anime Data
@@ -426,7 +421,6 @@ const EpisodePage = () => {
                 } else {
                     defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
                 }
-                console.log('def:',defaultSource);
                 setHlsSource(`/api/proxy/${defaultSource['url']}`);
                 if (defaultSubtitle) setSubtitles(defaultSubtitle['url']);
                 if (defaultThumbnail) setThumbnails(defaultThumbnail['url']);
@@ -652,17 +646,17 @@ const EpisodePage = () => {
                                     <div className="flex items-center space-x-4">
                                         <span className="text-lg font-semibold">AutoNext:</span>
                                         <Switch
-                                          checked={autoNext}
-                                          color={"red"}
-                                          onChange={(event) => setAutoNext(event.currentTarget.checked)}
+                                            checked={autoNext}
+                                            color={"red"}
+                                            onChange={(event) => setAutoNext(event.currentTarget.checked)}
                                         />
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         <span className="text-lg font-semibold">AutoSkip:</span>
                                         <Switch
-                                          checked={autoSkip}
-                                          color={"red"}
-                                          onChange={(event) => setAutoSkip(event.currentTarget.checked)}
+                                            checked={autoSkip}
+                                            color={"red"}
+                                            onChange={(event) => setAutoSkip(event.currentTarget.checked)}
                                         />
                                     </div>
                                 </div>
@@ -686,24 +680,31 @@ const EpisodePage = () => {
                                     )}
                                 </div>
 
-                                {/*<div className="bg-gray-800 rounded-lg p-6 mb-8">*/}
-                                {/*    <h2 className="text-2xl font-bold mb-4">Source Selection</h2>*/}
-                                {/*    <div className="flex space-x-4">*/}
-                                {/*        <button*/}
-                                {/*            className={`btn ${selectedSource === 'sub' ? 'btn-primary' : 'btn-outline'}`}*/}
-                                {/*            onClick={() => handleSourceChange('sub')}*/}
-                                {/*        >*/}
-                                {/*            Sub*/}
-                                {/*        </button>*/}
-                                {/*        <button*/}
-                                {/*            className={`btn ${selectedSource === 'dub' ? 'btn-primary' : 'btn-outline'}`}*/}
-                                {/*            onClick={() => handleSourceChange('dub')}*/}
-                                {/*        >*/}
-                                {/*            Dub*/}
-                                {/*        </button>*/}
-                                {/*    </div>*/}
-                                {/*</div>*/}
-
+                                <div className="bg-gray-800 rounded-lg p-6 mb-8">
+                                    <h2 className="text-2xl font-bold mb-4">Source Selection</h2>
+                                    <p className={'text-white my-2'}>If the episode does not work then choose another
+                                        source</p>
+                                    <div className="flex space-x-4">
+                                        <Button
+                                            className={`btn ${selectedSource.domain === 'gogoanime' ? 'btn-primary' : 'btn-outline'}`}
+                                            onClick={() => setSelectedSource({
+                                                domain: 'gogoanime',
+                                                dub: false
+                                            })}
+                                        >
+                                            GogoAnime
+                                        </Button>
+                                        <Button
+                                            className={`btn ${selectedSource.domain === 'zoro' ? 'btn-primary' : 'btn-outline'}`}
+                                            onClick={() => setSelectedSource({
+                                                domain: 'zoro',
+                                                dub: false
+                                            })}
+                                        >
+                                            Zoro
+                                        </Button>
+                                    </div>
+                                </div>
                                 <div className="bg-gray-800 rounded-lg p-6 mb-8">
                                     <h2 className="text-2xl font-bold mb-4">Episode List</h2>
                                     {animeData.totalEpisodes > 30 && (
@@ -751,6 +752,7 @@ const EpisodePage = () => {
                                 </div>
                             </div>
 
+
                             <div className="lg:col-span-1">
                                 <div className="bg-gray-800 rounded-lg p-6 mb-8">
                                     <h2 className="text-2xl font-bold mb-4">Anime Info</h2>
@@ -762,7 +764,7 @@ const EpisodePage = () => {
                                         className="rounded-lg mb-4"
                                     />
                                     <p className="mb-2"><strong>Status:</strong> {animeData.status}</p>
-                                    <p className="mb-2"><strong>Episodes:</strong> {animeData.totalEpisodes}</p>
+                                    <p className="mb-2"><strong>Episodes:</strong> {animeData.currentEpisode}</p>
                                     <p className="mb-2"><strong>Genre:</strong> {animeData.genres.join(', ')}</p>
                                     <div className="text-sm text-gray-300 whitespace-pre-wrap">
                                         {formatDescription(animeData.description).split('**').map((text, index) =>
@@ -774,7 +776,7 @@ const EpisodePage = () => {
                                 <div className="bg-gray-800 rounded-lg p-6 mb-8">
                                     <h2 className="text-2xl font-bold mb-4">Recommended Anime</h2>
                                     <div className="space-y-4">
-                                    {animeData.recommendations.slice(0, 5).map((rec) => (
+                                        {animeData.recommendations.slice(0, 5).map((rec) => (
                                             <Link key={rec.id} href={`/category/${rec.id}`}
                                                   className="flex items-center space-x-4 hover:bg-gray-700 p-2 rounded">
                                                 <Image
