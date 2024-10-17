@@ -4,7 +4,8 @@ import Image from 'next/image'
 import Link from 'next/link'
 import axios from 'axios'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons'
+import { Switch } from '@mantine/core';
+import { faArrowLeft, faArrowRight, faClosedCaptioning, faVolumeHigh } from '@fortawesome/free-solid-svg-icons'
 import {
     isHLSProvider,
     MediaPlayer, MediaPlayerInstance,
@@ -169,7 +170,6 @@ interface Episode {
     url: string;
 }
 
-
 type SkipTime = {
   interval: {
     startTime: number;
@@ -182,6 +182,10 @@ type FetchSkipTimesResponse = {
     results: SkipTime[];
 };
 
+interface Source {
+    domain: string,
+    dub: boolean
+}
 
 
 const EpisodePage = () => {
@@ -208,8 +212,10 @@ const EpisodePage = () => {
     });
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [currentEpisodeRange, setCurrentEpisodeRange] = useState<number>(0)
-    const [selectedSource, setSelectedSource] = useState<'sub' | 'dub'>('sub')
-
+    const [selectedSource, setSelectedSource] = useState<Source>({
+      domain: 'gogoanime',
+      dub: false
+    });
 
     const toggleAutoSkip = () => {
         const newAutoSkip = !autoSkip;
@@ -293,6 +299,7 @@ const EpisodePage = () => {
                 const title = animeData.title.english;
                 const playbackInfo = {
                     current_time,
+                    duration,
                     ep,
                     image,
                     title
@@ -361,13 +368,11 @@ const EpisodePage = () => {
         }
     }
 
-    async function fetchEpisodes(id: string | undefined, provider: string = 'zoro') {
+    async function fetchEpisodes(id: string | undefined) {
             if (id === undefined) return;
-            const params = new URLSearchParams({ provider, dub: selectedSource === 'dub' ? 'true' : 'false' });
-            // const url = `${API_URI}/meta/anilist/episodes/${encodeURIComponent(id)}?${params.toString()}`;
-            // const { data } = await axios.get(url);
+            const params = new URLSearchParams({ provider: selectedSource.domain, dub: selectedSource.dub ? 'true' : 'false' });
 
-            console.log('got alt results');
+            console.log('got episode data');
             const altUrl = `${API_URI}/meta/anilist/info/${encodeURIComponent(id)}?${params.toString()}`;
             const { data } = await axios.get(altUrl);
             const { episodes } = data;
@@ -384,10 +389,11 @@ const EpisodePage = () => {
     }, [router.isReady, router.query.ep])
 
     useEffect(() => {
+        console.log("repeat");
         if(ep > 0) {
             fetchVideoData();
         }
-    }, [id, ep])
+    }, [id, ep, selectedSource])
 
 
     async function fetchStreamData (id: string) {
@@ -395,23 +401,35 @@ const EpisodePage = () => {
 
         const url = `${API_URI}/meta/anilist/watch/${encodeURIComponent(id)}`;
         try {
-                const { data } = await axios.get(url, { params: { provider: "zoro" } });
+                const { data } = await axios.get(url, { params: { provider: selectedSource.domain } });
                 const {sources, subtitles, intro, outro } = data;
-                const defaultSource = sources.find(((source: { type: string; }) => source.type === 'hls'));
-                // const subtitles = data['subtitles'];
-                const defaultSubtitle = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'English'));
-                const defaultThumbnail = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'Thumbnails'));
-                const skipCues = [
-                    { startTime: intro.start, endTime: intro.end, text: 'Intro' },
-                    { startTime: outro.start, endTime: outro.end, text: 'Outro' },
-                ]
-
+                let defaultSource = {
+                    url: ''
+                };
+                let defaultSubtitle = {
+                    url: ''
+                };
+                let defaultThumbnail = {
+                    url: ''
+                };
+                if (selectedSource.domain === 'zoro') {
+                    defaultSource = sources.find(((source: { type: string; }) => source.type === 'hls'));
+                    defaultSubtitle = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'English'));
+                    defaultThumbnail = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'Thumbnails'));
+                    let skipCues = [
+                        { startTime: intro.start, endTime: intro.end, text: 'Intro' },
+                        { startTime: outro.start, endTime: outro.end, text: 'Outro' },
+                    ];
+                    setSkipTimes({
+                        cues: skipCues
+                    });
+                } else {
+                    defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
+                }
+                console.log('def:',defaultSource);
                 setHlsSource(`/api/proxy/${defaultSource['url']}`);
                 if (defaultSubtitle) setSubtitles(defaultSubtitle['url']);
                 if (defaultThumbnail) setThumbnails(defaultThumbnail['url']);
-                setSkipTimes({
-                    cues: skipCues
-                })
 
                 setIsLoading(false);
             } catch (err) {
@@ -493,10 +511,6 @@ const EpisodePage = () => {
         router.push(`/category/${id}`);
     };
 
-    const handleSourceChange = (source: 'sub' | 'dub') => {
-        setSelectedSource(source)
-    }
-
     const getEpisodeRanges = () => {
         if (!animeData) return []
         const totalEpisodes = animeData.totalEpisodes
@@ -550,18 +564,61 @@ const EpisodePage = () => {
     )
   }
 
+  //  const SourceSelection = () => (
+  //   <div className="bg-gray-900 rounded-lg p-4 mb-6">
+  //     <div className="flex items-center mb-2">
+  //       <FontAwesomeIcon icon={faClosedCaptioning} className="mr-2 text-gray-400" />
+  //       <span className="text-sm font-semibold text-gray-400">Sub</span>
+  //     </div>
+  //     <div className="flex space-x-2 mb-4">
+  //       {['zoro', 'gogoanime'].map((source) => (
+  //         <button
+  //           key={`sub-${source}`}
+  //           className={`px-4 py-2 rounded ${
+  //             selectedSubSource === source
+  //               ? 'bg-purple-600 text-white'
+  //               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+  //           }`}
+  //           onClick={() => setSelectedSubSource(source)}
+  //         >
+  //           {source}
+  //         </button>
+  //       ))}
+  //     </div>
+  //     <div className="flex items-center mb-2">
+  //       <FontAwesomeIcon icon={faVolumeHigh} className="mr-2 text-gray-400" />
+  //       <span className="text-sm font-semibold text-gray-400">Dub</span>
+  //     </div>
+  //     <div className="flex space-x-2">
+  //       {['zoro', 'gogoanime'].map((source) => (
+  //         <button
+  //           key={`dub-${source}`}
+  //           className={`px-4 py-2 rounded ${
+  //             selectedSubSource === source
+  //               ? 'bg-purple-600 text-white'
+  //               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+  //           }`}
+  //           onClick={() => setSelectedSubSource(source)}
+  //         >
+  //           {source}
+  //         </button>
+  //       ))}
+  //     </div>
+  //   </div>
+  // )
+
     // @ts-ignore
     return (
         <div className="min-h-screen bg-black text-white">
             <KNHeader/>
             <main className="container mx-auto px-4 py-8">
-                <button
-                    onClick={() => router.push(`/category/${id}`)}
-                    className="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center space-x-2"
-                >
-                    <FontAwesomeIcon icon={faArrowLeft}/>
-                    <span>Back to Anime Page</span>
-                </button>
+                {/*<button*/}
+                {/*    onClick={() => router.push(`/category/${id}`)}*/}
+                {/*    className="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center space-x-2"*/}
+                {/*>*/}
+                {/*    <FontAwesomeIcon icon={faArrowLeft}/>*/}
+                {/*    <span>Back to Anime Page</span>*/}
+                {/*</button>*/}
 
                 {animeData && (
                     <>
@@ -591,43 +648,25 @@ const EpisodePage = () => {
                                     </MediaPlayer>
                                 </div>
 
-                                <div className="flex justify-between mb-8">
+                                <div className="flex mb-8 gap-2">
                                     <div className="flex items-center space-x-4">
                                         <span className="text-lg font-semibold">AutoNext:</span>
-                                        <div className="btn-group">
-                                            <button
-                                                className={`btn ${autoNext ? 'btn-active' : ''}`}
-                                                onClick={() => setAutoNext(true)}
-                                            >
-                                                On
-                                            </button>
-                                            <button
-                                                className={`btn ${!autoNext ? 'btn-active' : ''}`}
-                                                onClick={() => setAutoNext(false)}
-                                            >
-                                                Off
-                                            </button>
-                                        </div>
+                                        <Switch
+                                          checked={autoNext}
+                                          color={"red"}
+                                          onChange={(event) => setAutoNext(event.currentTarget.checked)}
+                                        />
                                     </div>
                                     <div className="flex items-center space-x-4">
                                         <span className="text-lg font-semibold">AutoSkip:</span>
-                                        <div className="btn-group">
-                                            <button
-                                                className={`btn ${autoSkip ? 'btn-active' : ''}`}
-                                                onClick={() => setAutoSkip(true)}
-                                            >
-                                                On
-                                            </button>
-                                            <button
-                                                className={`btn ${!autoSkip ? 'btn-active' : ''}`}
-                                                onClick={() => setAutoSkip(false)}
-                                            >
-                                                Off
-                                            </button>
-                                        </div>
+                                        <Switch
+                                          checked={autoSkip}
+                                          color={"red"}
+                                          onChange={(event) => setAutoSkip(event.currentTarget.checked)}
+                                        />
                                     </div>
                                 </div>
-
+                                {/*<SourceSelection />*/}
                                 <div className="flex justify-between mb-8">
                                     {ep > 1 && (
                                         <button
