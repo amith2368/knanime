@@ -109,7 +109,7 @@ const KNHeader: React.FC = () => {
         <header className="z-50 sticky top-0 backdrop-blur-md flex flex-wrap sm:justify-start sm:flex-nowrap w-full bg-transparent text-sm py-4">
             <nav className="max-w-[85rem] w-full mx-auto px-4 flex flex-wrap basis-full items-center justify-between"
                  aria-label="Global">
-                <Link href="/home">
+                <Link href="/pages/home">
                     <img className="w-36 h-auto" src="/logo.png" alt="Logo"/>
                 </Link>
                 <div className="sm:order-3 flex items-center gap-x-2">

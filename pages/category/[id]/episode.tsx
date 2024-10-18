@@ -22,6 +22,8 @@ import '@vidstack/react/player/styles/default/theme.css'
 import '@vidstack/react/player/styles/default/layouts/video.css'
 import "../../../app/globals.css";
 import {Button, ListItem} from "@mantine/core";
+import { DiscussionEmbed } from 'disqus-react';
+import {usePathname} from "next/navigation";
 
 interface AnimeDetails {
   id: string;
@@ -193,6 +195,7 @@ const EpisodePage = () => {
     const router = useRouter();
     const player = useRef<MediaPlayerInstance>(null);
     let { id } = router.query;
+    const pathname = usePathname();
     const [ep, setEp] = useState<number>(0);
     const [animeData, setAnimeData] = useState<AnimeDetails | null>(null);
     const [allEpisodes, setAllEpisodes] = useState<Episode[]>([]);
@@ -558,61 +561,87 @@ const EpisodePage = () => {
     )
   }
 
-  //  const SourceSelection = () => (
-  //   <div className="bg-gray-900 rounded-lg p-4 mb-6">
-  //     <div className="flex items-center mb-2">
-  //       <FontAwesomeIcon icon={faClosedCaptioning} className="mr-2 text-gray-400" />
-  //       <span className="text-sm font-semibold text-gray-400">Sub</span>
-  //     </div>
-  //     <div className="flex space-x-2 mb-4">
-  //       {['zoro', 'gogoanime'].map((source) => (
-  //         <button
-  //           key={`sub-${source}`}
-  //           className={`px-4 py-2 rounded ${
-  //             selectedSubSource === source
-  //               ? 'bg-purple-600 text-white'
-  //               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-  //           }`}
-  //           onClick={() => setSelectedSubSource(source)}
-  //         >
-  //           {source}
-  //         </button>
-  //       ))}
-  //     </div>
-  //     <div className="flex items-center mb-2">
-  //       <FontAwesomeIcon icon={faVolumeHigh} className="mr-2 text-gray-400" />
-  //       <span className="text-sm font-semibold text-gray-400">Dub</span>
-  //     </div>
-  //     <div className="flex space-x-2">
-  //       {['zoro', 'gogoanime'].map((source) => (
-  //         <button
-  //           key={`dub-${source}`}
-  //           className={`px-4 py-2 rounded ${
-  //             selectedSubSource === source
-  //               ? 'bg-purple-600 text-white'
-  //               : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-  //           }`}
-  //           onClick={() => setSelectedSubSource(source)}
-  //         >
-  //           {source}
-  //         </button>
-  //       ))}
-  //     </div>
-  //   </div>
-  // )
+  const SkeletonLoader = () => (
+    <div className="animate-pulse">
+      <div className="h-[60vh] bg-gray-700 rounded w-full mb-4"></div>
+      <div className="aspect-w-16 aspect-h-9 bg-gray-700 rounded-lg mb-6"></div>
+      <div className="flex justify-between mb-8">
+        <div className="h-10 bg-gray-700 rounded w-1/4"></div>
+        <div className="h-10 bg-gray-700 rounded w-1/4"></div>
+      </div>
+      <div className="bg-gray-800 rounded-lg p-6 mb-8">
+        <div className="h-6 bg-gray-700 rounded w-1/4 mb-4"></div>
+        <div className="space-y-4">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="flex items-center space-x-4">
+              <div className="w-24 h-16 bg-gray-700 rounded"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+
+  const AnimeInfoSkeleton = () => (
+    <div className="animate-pulse">
+      <div className="bg-gray-800 rounded-lg p-6 mb-8">
+        <div className="h-6 bg-gray-700 rounded w-1/2 mb-4"></div>
+        <div className="w-full h-64 bg-gray-700 rounded-lg mb-4"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+          <div className="h-4 bg-gray-700 rounded w-2/3"></div>
+        </div>
+        <div className="h-4 bg-gray-700 rounded w-full mt-4"></div>
+        <div className="h-4 bg-gray-700 rounded w-full mt-2"></div>
+        <div className="h-4 bg-gray-700 rounded w-3/4 mt-2"></div>
+      </div>
+      <div className="bg-gray-800 rounded-lg p-6 mb-8">
+        <div className="h-6 bg-gray-700 rounded w-2/3 mb-4"></div>
+        <div className="space-y-4">
+          {[...Array(5)].map((_, index) => (
+            <div key={index} className="flex items-center space-x-4">
+              <div className="w-12 h-16 bg-gray-700 rounded"></div>
+              <div className="flex-1">
+                <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
 
     // @ts-ignore
     return (
         <div className="min-h-screen bg-black text-white">
             <KNHeader/>
-            <main className="container mx-auto px-4 py-8">
-                {/*<button*/}
-                {/*    onClick={() => router.push(`/category/${id}`)}*/}
-                {/*    className="mb-6 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 ease-in-out flex items-center space-x-2"*/}
-                {/*>*/}
-                {/*    <FontAwesomeIcon icon={faArrowLeft}/>*/}
-                {/*    <span>Back to Anime Page</span>*/}
-                {/*</button>*/}
+            <main className="container mx-auto px-4 py-2">
+                {isLoading ? (
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2">
+                      <SkeletonLoader />
+                    </div>
+                    <div className="lg:col-span-1">
+                      <AnimeInfoSkeleton />
+                    </div>
+                  </div>
+                ) : error ? (
+                  <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+                    <p className="text-xl mb-4">Error: {error}</p>
+                    <button
+                      onClick={() => router.push('/')}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded"
+                    >
+                      Go Back to Home
+                    </button>
+                  </div>
+                ) : ''}
 
                 {animeData && (
                     <>
@@ -750,6 +779,17 @@ const EpisodePage = () => {
                                         ))}
                                     </div>
                                 </div>
+                                <DiscussionEmbed
+                                    shortname='knanime'
+                                    config={
+                                        {
+                                            url: 'https://knanime.vercel.app' + pathname,
+                                            identifier: id + '-' + ep,
+                                            title: animeData.title.english || animeData.title.romaji || 'KNAnime',
+
+                                        }
+                                    }
+                                />
                             </div>
 
 

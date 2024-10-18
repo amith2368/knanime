@@ -32,6 +32,7 @@
     "autoprefixer": "^10.4.19",
     "axios": "^1.6.8",
     "cheerio": "^1.0.0-rc.12",
+    "disqus-react": "^1.1.5",
     "dompurify": "^3.1.7",
     "embla-carousel-autoplay": "^7.1.0",
     "embla-carousel-react": "^7.1.0",

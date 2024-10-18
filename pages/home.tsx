@@ -339,4 +339,4 @@ const AnimeGrid = () => (
   )
 }
 
-export default Home
+export default Home;
