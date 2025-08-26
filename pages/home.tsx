@@ -17,7 +17,7 @@ import 'swiper/css'
 import 'swiper/css/pagination'
 import 'swiper/css/autoplay'
 
-const API_URI = 'https://knanime-api.vercel.app'
+const API_URI = 'https://knanime-api-dev.vercel.app'
 
 const Home: React.FC = () => {
   const router = useRouter()

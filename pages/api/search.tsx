@@ -67,7 +67,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     try {
 
         // New API
-        const url = `https://knanime-api.vercel.app/meta/anilist/${encodeURIComponent(keyword)}`;
+        const url = `https://knanime-api.vercel-dev.app/meta/anilist/${encodeURIComponent(keyword)}`;
         const { data } = await axios.get(url);
         const animes: AnimeSearchResult[] = data.results;
         // Filter and remove the animes from the list which doesnt have attribute malId as null

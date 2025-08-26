@@ -101,7 +101,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
     // };
 
     // NEW API
-    const url = `https://knanime-api.vercel.app/meta/anilist/data/${encodeURIComponent(id)}`;
+    const url = `https://knanime-api-dev.vercel.app/meta/anilist/data/${encodeURIComponent(id)}`;
     const { data } = await axios.get(url);
     const anime: AnimeDetail = data;
     res.status(200).json(anime);

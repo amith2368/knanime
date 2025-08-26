@@ -191,7 +191,7 @@ interface Source {
 
 
 const EpisodePage = () => {
-    const API_URI = 'https://knanime-api.vercel.app'
+    const API_URI = 'https://knanime-api-dev.vercel.app'
     const router = useRouter();
     const player = useRef<MediaPlayerInstance>(null);
     let { id } = router.query;
@@ -216,7 +216,7 @@ const EpisodePage = () => {
     const [currentTime, setCurrentTime] = useState<number>(0);
     const [currentEpisodeRange, setCurrentEpisodeRange] = useState<number>(0)
     const [selectedSource, setSelectedSource] = useState<Source>({
-      domain: 'gogoanime',
+      domain: 'zoro',
       dub: false
     });
 
@@ -399,34 +399,42 @@ const EpisodePage = () => {
 
         const url = `${API_URI}/meta/anilist/watch/${encodeURIComponent(id)}`;
         try {
-                const { data } = await axios.get(url, { params: { provider: selectedSource.domain } });
-                const {sources, subtitles, intro, outro } = data;
+                let { data } = await axios.get(url, { params: { provider: selectedSource.domain } });
+                if (selectedSource.domain === 'zoro') {
+                    const { headers } = data;
+                    const referer = headers['Referer'];
+                    const { data: streamData } = await axios.get(`https://yumaapisources.vercel.app/sources?url=${referer}`);
+                    data = streamData;
+                }
                 let defaultSource = {
-                    url: ''
+                    file: ''
                 };
                 let defaultSubtitle = {
-                    url: ''
+                    file: ''
                 };
                 let defaultThumbnail = {
-                    url: ''
+                    file: ''
                 };
+                
                 if (selectedSource.domain === 'zoro') {
+                    const {sources, tracks } = data;
                     defaultSource = sources.find(((source: { type: string; }) => source.type === 'hls'));
-                    defaultSubtitle = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'English'));
-                    defaultThumbnail = subtitles.find(((subtitle: { lang: string; }) => subtitle.lang === 'Thumbnails'));
-                    let skipCues = [
-                        { startTime: intro.start, endTime: intro.end, text: 'Intro' },
-                        { startTime: outro.start, endTime: outro.end, text: 'Outro' },
-                    ];
-                    setSkipTimes({
-                        cues: skipCues
-                    });
+                    defaultSubtitle = tracks.find(((track: { kind: string; label: string; }) => track.kind === 'subtitles' && track.label === 'English'));
+                    defaultThumbnail = tracks.find(((track: { kind: string; }) => track.kind === 'thumbnails'));
+                    // let skipCues = [
+                    //     { startTime: intro.start, endTime: intro.end, text: 'Intro' },
+                    //     { startTime: outro.start, endTime: outro.end, text: 'Outro' },
+                    // ];
+                    // setSkipTimes({
+                    //     cues: skipCues
+                    // });
                 } else {
+                    const {sources, subtitles, intro, outro } = data;
                     defaultSource = sources.find(((source: { quality: string; }) => source.quality === 'default'));
                 }
-                setHlsSource(`/api/proxy/${defaultSource['url']}`);
-                if (defaultSubtitle) setSubtitles(defaultSubtitle['url']);
-                if (defaultThumbnail) setThumbnails(defaultThumbnail['url']);
+                setHlsSource(`/api/proxy/${defaultSource['file']}`);
+                if (defaultSubtitle) setSubtitles(defaultSubtitle['file']);
+                if (defaultThumbnail) setThumbnails(defaultThumbnail['file']);
 
                 setIsLoading(false);
             } catch (err) {
